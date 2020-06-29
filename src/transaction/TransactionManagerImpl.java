@@ -13,8 +13,7 @@ public class TransactionManagerImpl
         implements TransactionManager {
 
     public static void main(String args[]) {
-        System.setSecurityManager(new RMISecurityManager());
-
+//        System.setSecurityManager(new RMISecurityManager());
         String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
             rmiPort = "";

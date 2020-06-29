@@ -1,4 +1,4 @@
-RMIREGPORT =3345 
+RMIREGPORT =3345
 PROJECTROOT = ..
 PATH = /usr/bin
 all : server client
