@@ -1,3 +1,5 @@
 *.class
 .idea
+.idea/*
 bin/
+.idea/vcs.xml
