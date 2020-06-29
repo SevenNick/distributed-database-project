@@ -1,8 +1,6 @@
 package transaction;
 
-import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
-import java.rmi.RemoteException;
+import java.rmi.*;
 
 /**
  * Transaction Manager for the Distributed Travel Reservation System.
@@ -15,8 +13,7 @@ public class TransactionManagerImpl
         implements TransactionManager {
 
     public static void main(String args[]) {
-        System.setSecurityManager(new RMISecurityManager());
-
+//        System.setSecurityManager(new RMISecurityManager());
         String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
             rmiPort = "";

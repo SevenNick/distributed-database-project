@@ -1,12 +1,24 @@
 package transaction;
 
-import lockmgr.DeadlockException;
-import lockmgr.LockManager;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import lockmgr.DeadlockException;
+import lockmgr.LockManager;
 
 /**
  * Resource Manager for the Distributed Travel Reservation System.
@@ -60,27 +72,29 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             }
         }
 
-        new Thread(() -> {
-            while (true) {
-                try {
-                    if (tm != null)
-                        tm.ping();
-                } catch (Exception e) {
-                    tm = null;
-                }
+        new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        if (tm != null)
+                            tm.ping();
+                    } catch (Exception e) {
+                        tm = null;
+                    }
 
-                if (tm == null) {
-                    reconnect();
-                    System.out.println("reconnect tm!");
+                    if (tm == null) {
+                        reconnect();
+                        System.out.println("reconnect tm!");
+
+                    }
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
 
                 }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ignored) {
-                }
-
             }
-        }).start();
+        }.start();
     }
 
     public void ping() {

@@ -26,7 +26,7 @@ public class WorkflowControllerImpl
     protected TransactionManager tm = null;
 
     public static void main(String args[]) {
-        System.setSecurityManager(new RMISecurityManager());
+//        System.setSecurityManager(new RMISecurityManager());
 
         String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
