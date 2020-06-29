@@ -8,11 +8,10 @@ package transaction;
 
 /**
  * @author RAdmin
- *
+ * <p>
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class ResourceManagerUnaccessibleException extends Exception
-{
+public class ResourceManagerUnaccessibleException extends Exception {
 
 }
