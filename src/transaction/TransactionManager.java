@@ -1,8 +1,9 @@
 package transaction;
 
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
-/** 
+/**
  * Interface for the Transaction Manager of the Distributed Travel
  * Reservation System.
  * <p>
@@ -13,13 +14,15 @@ import java.rmi.*;
 public interface TransactionManager extends Remote {
 
     public boolean dieNow()
-	throws RemoteException;
+            throws RemoteException;
 
     public void ping() throws RemoteException;
-    
-	public void enlist(int xid, ResourceManager rm) throws RemoteException;
 
-	
-    /** The RMI name a TransactionManager binds to. */
+    public void enlist(int xid, ResourceManager rm) throws RemoteException;
+
+
+    /**
+     * The RMI name a TransactionManager binds to.
+     */
     public static final String RMIName = "TM";
 }

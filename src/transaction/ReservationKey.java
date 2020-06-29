@@ -10,27 +10,24 @@ import java.io.Serializable;
 
 /**
  * @author RAdmin
- * 
+ * <p>
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class ReservationKey implements Serializable
-{
+public class ReservationKey implements Serializable {
     protected String custName;
 
     protected int resvType;
 
     protected String resvKey;
 
-    public ReservationKey(String custName, int resvType, String resvKey)
-    {
+    public ReservationKey(String custName, int resvType, String resvKey) {
         this.custName = custName;
         this.resvKey = resvKey;
         this.resvType = resvType;
     }
 
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (o == null || !(o instanceof ReservationKey))
             return false;
         if (this == o)
@@ -41,13 +38,11 @@ public class ReservationKey implements Serializable
         return false;
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         return custName.hashCode() + resvType + resvKey.hashCode();
     }
 
-    public String toString()
-    {
+    public String toString() {
         StringBuffer buf = new StringBuffer("[");
         buf.append("customer name=");
         buf.append(custName);
