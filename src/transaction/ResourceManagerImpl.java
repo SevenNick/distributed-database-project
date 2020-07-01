@@ -145,12 +145,13 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
     public boolean reconnect() {
         Properties prop = new Properties();
         try {
-            prop.load(new FileInputStream("conf/ddb.conf"));
+            prop.load(new FileInputStream("../../conf/ddb.conf"));
         } catch (Exception e1) {
             e1.printStackTrace();
             return false;
         }
-        String rmiPort = prop.getProperty("tm.port");
+        // String rmiPort = prop.getProperty("tm.port");
+        String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
             rmiPort = "";
         } else if (!rmiPort.equals("")) {
