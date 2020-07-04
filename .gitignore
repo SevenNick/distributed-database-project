@@ -1,5 +1,5 @@
 *.class
 .idea
 .idea/*
-bin/
+out/
 .idea/vcs.xml

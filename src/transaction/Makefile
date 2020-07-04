@@ -3,6 +3,8 @@ PROJECTROOT = ..
 PATH = /usr/bin
 all : server client
 
+client: Client.class
+
 server : ResourceManager.class \
          ResourceManagerImpl.class \
          ResourceManagerImpl_Stub.class \
@@ -13,13 +15,7 @@ server : ResourceManager.class \
          WorkflowControllerImpl.class \
          WorkflowControllerImpl_Stub.class \
          InvalidTransactionException.class \
-         TransactionAbortedException.class \
-		 RMManagerCars.class \
-		 RMManagerCustomers.class \
-		 RMManagerFlights.class \
-		 RMManagerHotels.class
-
-client: Client.class
+         TransactionAbortedException.class
 
 runregistry :
 	$(PATH)/rmiregistry -J-classpath -J$(PROJECTROOT) $(RMIREGPORT)
@@ -28,16 +24,16 @@ runtm : server
 	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -Djava.security.policy=./security-policy transaction.TransactionManagerImpl
 
 runrmflights : server
-	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMFlights -Djava.security.policy=./security-policy transaction.RMManagerFlights
+	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMFlights -Djava.security.policy=./security-policy transaction.ResourceManagerImpl
 
 runrmrooms : server
-	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMRooms -Djava.security.policy=./security-policy transaction.RMManagerHotels
+	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMRooms -Djava.security.policy=./security-policy transaction.ResourceManagerImpl
 
 runrmcars : server
-	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMCars -Djava.security.policy=./security-policy transaction.RMManagerCars
+	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMCars -Djava.security.policy=./security-policy transaction.ResourceManagerImpl
 
 runrmcustomers : server
-	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMCustomers -Djava.security.policy=./security-policy transaction.RMManagerCustomers
+	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMCustomers -Djava.security.policy=./security-policy transaction.ResourceManagerImpl
 
 runwc : server
 	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -Djava.security.policy=./security-policy transaction.WorkflowControllerImpl
