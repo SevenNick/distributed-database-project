@@ -1,8 +1,6 @@
 package transaction;
 
-import java.io.FileInputStream;
-import java.rmi.Naming;
-import java.util.Properties;
+import java.rmi.*;
 
 /**
  * A toy client of the Distributed Travel Reservation System.
@@ -11,14 +9,7 @@ import java.util.Properties;
 public class Client {
 
     public static void main(String args[]) {
-        Properties prop = new Properties();
-        try {
-            prop.load(new FileInputStream("conf/ddb.conf"));
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            return;
-        }
-        String rmiPort = prop.getProperty("wc.port");
+        String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
             rmiPort = "";
         } else if (!rmiPort.equals("")) {
