@@ -2,4 +2,5 @@
 .idea
 .idea/*
 out/
+bin/
 .idea/vcs.xml
