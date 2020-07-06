@@ -15,7 +15,10 @@ import java.io.Serializable;
  * Preferences - Java - Code Style - Code Templates
  */
 public class Reservation implements ResourceItem, Serializable {
-    public static final String INDEX_CUSTNAME = "custName";
+
+    private static final String INDEX_CUSTOMER_NAME = "custName";
+    private static final String INDEX_RESERVATION_TYPE = "resvType";
+    private static final String INDEX_RESERVATION_KEY = "resvKey";
 
     public static final int RESERVATION_TYPE_FLIGHT = 1;
 
@@ -46,10 +49,18 @@ public class Reservation implements ResourceItem, Serializable {
     }
 
     public Object getIndex(String indexName) throws InvalidIndexException {
-        if (indexName.equals(INDEX_CUSTNAME))
+        if (indexName.equals(INDEX_CUSTOMER_NAME)) {
             return custName;
-        else
+        }
+        else if (indexName.equals(INDEX_RESERVATION_KEY)) {
+            return resvKey;
+        }
+        else if (indexName.equals(INDEX_RESERVATION_TYPE)) {
+            return resvType;
+        }
+        else {
             throw new InvalidIndexException(indexName);
+        }
     }
 
     public Object getKey() {
