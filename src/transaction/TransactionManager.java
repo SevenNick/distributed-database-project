@@ -25,4 +25,13 @@ public interface TransactionManager extends Remote {
      * The RMI name a TransactionManager binds to.
      */
     public static final String RMIName = "TM";
+
+    // Below is add by xsh because TM need them!
+
+    int start() throws RemoteException;
+
+    boolean commit() throws RemoteException, TransactionAbortedException, InvalidTransactionException;
+
+    void abort() throws RemoteException, InvalidTransactionException;
+
 }
