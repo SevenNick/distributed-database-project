@@ -50,6 +50,10 @@ public class Customer implements ResourceItem, Serializable {
         return custName;
     }
 
+    public void setCustName(String custName) {
+        this.custName = custName;
+    }
+
     @Override
     public Object clone() {
         Customer o = new Customer(getCustName());

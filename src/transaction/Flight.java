@@ -79,6 +79,22 @@ public class Flight implements ResourceItem, Serializable {
         return numAvail;
     }
 
+    public void setFlightNum(String flightNum) {
+        this.flightNum = flightNum;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public void setNumSeats(int numSeats) {
+        this.numSeats = numSeats;
+    }
+
+    public void setNumAvail(int numAvail) {
+        this.numAvail = numAvail;
+    }
+
     @Override
     public Object clone() {
         Flight o = new Flight(getFlightNum(), getPrice(), getNumSeats(), getNumAvail());

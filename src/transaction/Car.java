@@ -78,6 +78,22 @@ public class Car implements ResourceItem, Serializable {
         return numAvail;
     }
 
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public void setNumCars(int numCars) {
+        this.numCars = numCars;
+    }
+
+    public void setNumAvail(int numAvail) {
+        this.numAvail = numAvail;
+    }
+
     @Override
     public Object clone() {
         Car o = new Car(getLocation(), getPrice(), getNumCars(), getNumAvail());
