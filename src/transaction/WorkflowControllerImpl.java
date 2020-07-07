@@ -702,6 +702,10 @@ public class WorkflowControllerImpl
                     (ResourceManager) Naming.lookup(rmiPort +
                             ResourceManager.RMINameCustomers);
             System.out.println("WC bound to RMCustomers");
+            rmReservations =
+                    (ResourceManager) Naming.lookup(rmiPort +
+                            ResourceManager.RMINameReservations);
+            System.out.println("WC bound to RMReservations");
             tm =
                     (TransactionManager) Naming.lookup(rmiPort +
                             TransactionManager.RMIName);
@@ -713,7 +717,7 @@ public class WorkflowControllerImpl
 
         try {
             if (rmFlights.reconnect() && rmHotels.reconnect() &&
-                    rmCars.reconnect() && rmCustomers.reconnect()) {
+                    rmCars.reconnect() && rmCustomers.reconnect() && rmReservations.reconnect()) {
                 return true;
             }
         } catch (Exception e) {
