@@ -177,14 +177,14 @@ public interface WorkflowController extends Remote {
      * Add a new customer to database.  Should return success if
      * customer already exists.
      *
-     * @param xid      id of transaction.
-     * @param custName name of customer.
+     * @param xid          id of transaction.
+     * @param customerName name of customer.
      * @return true on success, false on failure.
      * @throws RemoteException             on communications failure.
      * @throws TransactionAbortedException if transaction was aborted.
      * @throws InvalidTransactionException if transaction id is invalid.
      */
-    public boolean newCustomer(int xid, String custName)
+    public boolean newCustomer(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -192,14 +192,14 @@ public interface WorkflowController extends Remote {
     /**
      * Delete this customer and un-reserve associated reservations.
      *
-     * @param xid      id of transaction.
-     * @param custName name of customer.
-     * @return true on success, false on failure. (custName==null or doesn't exist...)
+     * @param xid          id of transaction.
+     * @param customerName name of customer.
+     * @return true on success, false on failure. (customerName==null or doesn't exist...)
      * @throws RemoteException             on communications failure.
      * @throws TransactionAbortedException if transaction was aborted.
      * @throws InvalidTransactionException if transaction id is invalid.
      */
-    public boolean deleteCustomer(int xid, String custName)
+    public boolean deleteCustomer(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -264,8 +264,8 @@ public interface WorkflowController extends Remote {
             TransactionAbortedException,
             InvalidTransactionException;
 
-    /* Return the total price of all reservations held for a customer. Return -1 if custName==null or doesn't exist.*/
-    public int queryCustomerBill(int xid, String custName)
+    /* Return the total price of all reservations held for a customer. Return -1 if customerName==null or doesn't exist.*/
+    public int queryCustomerBill(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -278,15 +278,15 @@ public interface WorkflowController extends Remote {
     /**
      * Reserve a flight on behalf of this customer.
      *
-     * @param xid       id of transaction.
-     * @param custName  name of customer.
-     * @param flightNum flight number.
+     * @param xid          id of transaction.
+     * @param customerName name of customer.
+     * @param flightNum    flight number.
      * @return true on success, false on failure. (cust or flight doesn't exist; no seats left...)
      * @throws RemoteException             on communications failure.
      * @throws TransactionAbortedException if transaction was aborted.
      * @throws InvalidTransactionException if transaction id is invalid.
      */
-    public boolean reserveFlight(int xid, String custName, String flightNum)
+    public boolean reserveFlight(int xid, String customerName, String flightNum)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -294,7 +294,7 @@ public interface WorkflowController extends Remote {
     /**
      * Reserve a car for this customer at the specified location.
      */
-    public boolean reserveCar(int xid, String custName, String location)
+    public boolean reserveCar(int xid, String customerName, String location)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -302,7 +302,7 @@ public interface WorkflowController extends Remote {
     /**
      * Reserve a room for this customer at the specified location.
      */
-    public boolean reserveRoom(int xid, String custName, String location)
+    public boolean reserveRoom(int xid, String customerName, String location)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -342,7 +342,7 @@ public interface WorkflowController extends Remote {
      * <p>
      * This method is used for testing and is not part of a transaction.
      *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", "RMCustomers". or "RMReservations".
+     * @param who     which RM to kill; must be "RMFlights", "RMRooms", "RMCars", "RMCustomers". or "RMReservations".
      * @param dieTime when to kill RM; must be "AfterEnlist", "BeforePrepare", "AfterPrepare", "BeforeCommit", or "BeforeAbort".
      * @return true on success, false on failure.
      */

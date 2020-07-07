@@ -3,14 +3,14 @@ package transaction;
 import java.io.Serializable;
 
 public class Customer implements ResourceItem, Serializable {
-    private static final String INDEX_CUSTOMER_NAME = "custName";
+    private static final String INDEX_CUSTOMER_NAME = "customerName";
 
     private boolean isDeleted = false;
 
-    private String custName;
+    private String customerName;
 
-    public Customer(String custName) {
-        this.custName = custName;
+    public Customer(String customerName) {
+        this.customerName = customerName;
     }
 
     @Override
@@ -20,20 +20,20 @@ public class Customer implements ResourceItem, Serializable {
 
     @Override
     public String[] getColumnValues() {
-        return new String[]{custName};
+        return new String[]{customerName};
     }
 
     @Override
     public Object getIndex(String indexName) throws InvalidIndexException {
         if (indexName.equals(INDEX_CUSTOMER_NAME))
-            return custName;
+            return customerName;
         else
             throw new InvalidIndexException(indexName);
     }
 
     @Override
     public Object getKey() {
-        return custName;
+        return customerName;
     }
 
     @Override
@@ -46,17 +46,17 @@ public class Customer implements ResourceItem, Serializable {
         this.isDeleted = true;
     }
 
-    public String getCustName() {
-        return custName;
+    public String getCustomerName() {
+        return customerName;
     }
 
-    public void setCustName(String custName) {
-        this.custName = custName;
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     @Override
     public Object clone() {
-        Customer o = new Customer(getCustName());
+        Customer o = new Customer(getCustomerName());
         o.isDeleted = this.isDeleted;
         return o;
     }

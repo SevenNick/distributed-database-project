@@ -35,16 +35,17 @@ public class Flight implements ResourceItem, Serializable {
 
     @Override
     public Object getIndex(String indexName) throws InvalidIndexException {
-        if (indexName.equals(INDEX_FLIGHT_NUMBER)) {
-            return flightNum;
-        } else if (indexName.equals(INDEX_PRICE)) {
-            return price;
-        } else if (indexName.equals(INDEX_NUM_SEATS)) {
-            return numSeats;
-        } else if (indexName.equals(INDEX_NUM_AVAIL)) {
-            return numAvail;
-        } else {
-            throw new InvalidIndexException(indexName);
+        switch (indexName) {
+            case INDEX_FLIGHT_NUMBER:
+                return flightNum;
+            case INDEX_PRICE:
+                return price;
+            case INDEX_NUM_SEATS:
+                return numSeats;
+            case INDEX_NUM_AVAIL:
+                return numAvail;
+            default:
+                throw new InvalidIndexException(indexName);
         }
     }
 

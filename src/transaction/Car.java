@@ -34,16 +34,17 @@ public class Car implements ResourceItem, Serializable {
 
     @Override
     public Object getIndex(String indexName) throws InvalidIndexException {
-        if (indexName.equals(INDEX_LOCATION)) {
-            return location;
-        } else if (indexName.equals(INDEX_PRICE)) {
-            return price;
-        } else if (indexName.equals(INDEX_NUM_CARS)) {
-            return numCars;
-        } else if (indexName.equals(INDEX_NUM_AVAIL)) {
-            return numAvail;
-        } else {
-            throw new InvalidIndexException(indexName);
+        switch (indexName) {
+            case INDEX_LOCATION:
+                return location;
+            case INDEX_PRICE:
+                return price;
+            case INDEX_NUM_CARS:
+                return numCars;
+            case INDEX_NUM_AVAIL:
+                return numAvail;
+            default:
+                throw new InvalidIndexException(indexName);
         }
     }
 

@@ -15,16 +15,16 @@ import java.io.Serializable;
  * Preferences - Java - Code Style - Code Templates
  */
 public class ReservationKey implements Serializable {
-    protected String custName;
+    protected String customerName;
 
-    protected int resvType;
+    protected int reservationType;
 
-    protected String resvKey;
+    protected String reservationKey;
 
-    public ReservationKey(String custName, int resvType, String resvKey) {
-        this.custName = custName;
-        this.resvKey = resvKey;
-        this.resvType = resvType;
+    public ReservationKey(String customerName, int reservationType, String reservationKey) {
+        this.customerName = customerName;
+        this.reservationKey = reservationKey;
+        this.reservationType = reservationType;
     }
 
     public boolean equals(Object o) {
@@ -33,25 +33,25 @@ public class ReservationKey implements Serializable {
         if (this == o)
             return true;
         ReservationKey k = (ReservationKey) o;
-        if (k.custName.equals(custName) && k.resvKey.equals(resvKey) && k.resvType == resvType)
+        if (k.customerName.equals(customerName) && k.reservationKey.equals(reservationKey) && k.reservationType == reservationType)
             return true;
         return false;
     }
 
     public int hashCode() {
-        return custName.hashCode() + resvType + resvKey.hashCode();
+        return customerName.hashCode() + reservationType + reservationKey.hashCode();
     }
 
     public String toString() {
         StringBuffer buf = new StringBuffer("[");
         buf.append("customer name=");
-        buf.append(custName);
+        buf.append(customerName);
         buf.append(";");
-        buf.append("resvKey=");
-        buf.append(resvKey);
+        buf.append("reservationKey=");
+        buf.append(reservationKey);
         buf.append(";");
-        buf.append("resvType=");
-        buf.append(resvType);
+        buf.append("reservationType=");
+        buf.append(reservationType);
         buf.append("]");
 
         return buf.toString();

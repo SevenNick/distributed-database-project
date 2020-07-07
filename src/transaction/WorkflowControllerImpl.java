@@ -20,12 +20,12 @@ public class WorkflowControllerImpl
         extends java.rmi.server.UnicastRemoteObject
         implements WorkflowController {
 
-    protected ResourceManager rmFlights = null;
-    protected ResourceManager rmHotels = null;
-    protected ResourceManager rmCars = null;
-    protected ResourceManager rmCustomers = null;
-    protected ResourceManager rmReservations = null;
-    protected TransactionManager tm = null;
+    private ResourceManager rmFlights = null;
+    private ResourceManager rmHotels = null;
+    private ResourceManager rmCars = null;
+    private ResourceManager rmCustomers = null;
+    private ResourceManager rmReservations = null;
+    private TransactionManager tm = null;
 
     private static final String TABLE_NAME_FLIGHT = "FLIGHTS";
     private static final String TABLE_NAME_HOTEL = "HOTELS";
@@ -61,15 +61,14 @@ public class WorkflowControllerImpl
         }
         // get reference of all RMs and TM
         try {
-            rmFlights = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameFlights);
-            rmHotels= (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameRooms);
-            rmCars = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameCars);
-            rmCustomers = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameCustomers);
-            rmReservations = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameReservations);
+            rmFlights = (ResourceManager) Naming.lookup(rmiPort + ResourceManager.RMINameFlights);
+            rmHotels = (ResourceManager) Naming.lookup(rmiPort + ResourceManager.RMINameRooms);
+            rmCars = (ResourceManager) Naming.lookup(rmiPort + ResourceManager.RMINameCars);
+            rmCustomers = (ResourceManager) Naming.lookup(rmiPort + ResourceManager.RMINameCustomers);
+            rmReservations = (ResourceManager) Naming.lookup(rmiPort + ResourceManager.RMINameReservations);
 
             tm = (TransactionManager) Naming.lookup(rmiPort + TransactionManager.RMIName);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -77,8 +76,7 @@ public class WorkflowControllerImpl
         while (!reconnect()) {
             try {
                 Thread.sleep(1000);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -293,17 +291,17 @@ public class WorkflowControllerImpl
         }
     }
 
-    public boolean newCustomer(int xid, String custName)
+    public boolean newCustomer(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
 
-        if (custName == null) {
+        if (customerName == null) {
             return false;
         }
 
         try {
-            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, custName);
+            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, customerName);
 
             // The customer already exists, return true directly
             if (customer != null) {
@@ -311,7 +309,7 @@ public class WorkflowControllerImpl
             }
 
             // Add a new customer
-            customer = new Customer(custName);
+            customer = new Customer(customerName);
             return rmCustomers.insert(xid, TABLE_NAME_CUSTOMER, customer);
         } catch (DeadlockException e) {
             throw new TransactionAbortedException(xid, "Deadlock in Resource Manager");
@@ -319,17 +317,17 @@ public class WorkflowControllerImpl
     }
 
 
-    public boolean deleteCustomer(int xid, String custName)
+    public boolean deleteCustomer(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
 
-        if (custName == null) {
+        if (customerName == null) {
             return false;
         }
 
         try {
-            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, custName);
+            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, customerName);
 
             // The customer does not exist, return false directly
             if (customer == null) {
@@ -337,7 +335,7 @@ public class WorkflowControllerImpl
             }
 
             // Get all the reservations of the customer
-            Collection reservations = rmReservations.query(xid, TABLE_NAME_RESERVATION, INDEX_CUSTOMER_NAME, custName);
+            Collection reservations = rmReservations.query(xid, TABLE_NAME_RESERVATION, INDEX_CUSTOMER_NAME, customerName);
 
             if (reservations != null) {
                 // Un-reserve all the reservations before delete the customer
@@ -346,7 +344,7 @@ public class WorkflowControllerImpl
                         reservations) {
                     reservation = (Reservation) r;
                     // un-reserve the reservation first
-                    switch (reservation.getResvType()) {
+                    switch (reservation.getReservationType()) {
                         case RESERVATION_TYPE_FLIGHT:
                             unreserveFlight(xid, (String) reservation.getIndex(INDEX_RESERVATION_KEY));
                             break;
@@ -363,7 +361,7 @@ public class WorkflowControllerImpl
             }
 
             // After all the reservations related to the customer have been un-reserved, delete the customer
-            return rmCustomers.delete(xid, TABLE_NAME_CUSTOMER, custName);
+            return rmCustomers.delete(xid, TABLE_NAME_CUSTOMER, customerName);
 
         } catch (DeadlockException e) {
             throw new TransactionAbortedException(xid, "Deadlock in Resource Manager");
@@ -495,17 +493,17 @@ public class WorkflowControllerImpl
         }
     }
 
-    public int queryCustomerBill(int xid, String custName)
+    public int queryCustomerBill(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
 
-        if (custName == null) {
+        if (customerName == null) {
             return -1;
         }
 
         try {
-            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, custName);
+            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, customerName);
 
             // customer does not exist, return -1 directly
             if (customer == null) {
@@ -513,14 +511,14 @@ public class WorkflowControllerImpl
             }
 
             // get all reservations of the customer
-            Collection reservations = rmReservations.query(xid, TABLE_NAME_RESERVATION, INDEX_CUSTOMER_NAME, custName);
+            Collection reservations = rmReservations.query(xid, TABLE_NAME_RESERVATION, INDEX_CUSTOMER_NAME, customerName);
             int totalBill = 0;
             Reservation reservation;
             // count the total bill
             for (Object o :
                     reservations) {
                 reservation = (Reservation) o;
-                switch (reservation.getResvType()) {
+                switch (reservation.getReservationType()) {
                     case RESERVATION_TYPE_FLIGHT:
                         totalBill += queryFlightPrice(xid, (String) reservation.getIndex(INDEX_RESERVATION_KEY));
                         break;
@@ -544,17 +542,17 @@ public class WorkflowControllerImpl
 
 
     // RESERVATION INTERFACE
-    public boolean reserveFlight(int xid, String custName, String flightNum)
+    public boolean reserveFlight(int xid, String customerName, String flightNum)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
 
-        if (custName == null || flightNum == null) {
+        if (customerName == null || flightNum == null) {
             return false;
         }
 
         try {
-            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, custName);
+            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, customerName);
             // The customer does not exist
             if (customer == null) {
                 return false;
@@ -572,7 +570,7 @@ public class WorkflowControllerImpl
             rmFlights.update(xid, TABLE_NAME_FLIGHT, flight.getFlightNum(), flight);
 
             // add a new Reservation
-            Reservation reservation = new Reservation(custName, RESERVATION_TYPE_FLIGHT, flightNum);
+            Reservation reservation = new Reservation(customerName, RESERVATION_TYPE_FLIGHT, flightNum);
             rmReservations.insert(xid, TABLE_NAME_RESERVATION, reservation);
 
             return true;
@@ -581,17 +579,17 @@ public class WorkflowControllerImpl
         }
     }
 
-    public boolean reserveCar(int xid, String custName, String location)
+    public boolean reserveCar(int xid, String customerName, String location)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
 
-        if (custName == null || location == null) {
+        if (customerName == null || location == null) {
             return false;
         }
 
         try {
-            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, custName);
+            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, customerName);
             // The customer does not exist
             if (customer == null) {
                 return false;
@@ -609,7 +607,7 @@ public class WorkflowControllerImpl
             rmCars.update(xid, TABLE_NAME_CAR, car.getLocation(), car);
 
             // add a new Reservation
-            Reservation reservation = new Reservation(custName, RESERVATION_TYPE_CAR, location);
+            Reservation reservation = new Reservation(customerName, RESERVATION_TYPE_CAR, location);
             rmReservations.insert(xid, TABLE_NAME_RESERVATION, reservation);
 
             return true;
@@ -618,17 +616,17 @@ public class WorkflowControllerImpl
         }
     }
 
-    public boolean reserveRoom(int xid, String custName, String location)
+    public boolean reserveRoom(int xid, String customerName, String location)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
 
-        if (custName == null || location == null) {
+        if (customerName == null || location == null) {
             return false;
         }
 
         try {
-            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, custName);
+            Customer customer = (Customer) rmCustomers.query(xid, TABLE_NAME_CUSTOMER, customerName);
             // The customer does not exist
             if (customer == null) {
                 return false;
@@ -646,7 +644,7 @@ public class WorkflowControllerImpl
             rmHotels.update(xid, TABLE_NAME_HOTEL, hotel.getLocation(), hotel);
 
             // add a new Reservation
-            Reservation reservation = new Reservation(custName, RESERVATION_TYPE_HOTEL, location);
+            Reservation reservation = new Reservation(customerName, RESERVATION_TYPE_HOTEL, location);
             rmReservations.insert(xid, TABLE_NAME_RESERVATION, reservation);
 
             return true;
