@@ -338,92 +338,79 @@ public interface WorkflowController extends Remote {
             throws RemoteException;
 
     /**
-     * Sets a flag so that the RM fails after the next enlist()
-     * operation.  That is, the RM immediately dies on return of the
+     * Sets a flag so that the RM fails at the dieTime
+     * <p>
+     * This method is used for testing and is not part of a transaction.
+     *
+     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", "RMCustomers". or "RMReservations".
+     * @param dieTime when to kill RM; must be "AfterEnlist", "BeforePrepare", "AfterPrepare", "BeforeCommit", or "BeforeAbort".
+     * @return true on success, false on failure.
+     */
+    public boolean dieRM(String who, String dieTime)
+            throws RemoteException;
+
+    /**
+     * Sets a flag so that the TM fails at the dieTime
+     * <p>
+     * This method is used for testing and is not part of a transaction.
+     *
+     * @param dieTime when to kill RM; must be "BeforeCommit" or "AfterCommit".
+     * @return true on success, false on failure.
+     */
+    public boolean dieTM(String dieTime)
+            throws RemoteException;
+
+    // The valid dieTime for dieRM.
+
+    /**
+     * The RM fails after the next enlist() operation.
+     * That is, the RM immediately dies on return of the
      * enlist() call it made to the TM, before it could fulfil the
      * client's query/reservation request.
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMAfterEnlist(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_AFTER_ENLIST = "AfterEnlist";
 
     /**
-     * Sets a flag so that the RM fails when it next tries to prepare,
+     * The RM fails when it next tries to prepare,
      * but before it gets a chance to save the update list to disk.
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMBeforePrepare(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_BEFORE_PREPARE = "BeforePrepare";
 
     /**
-     * Sets a flag so that the RM fails when it next tries to prepare:
+     * The RM fails when it next tries to prepare:
      * after it has entered the prepared state, but just before it
      * could reply "prepared" to the TM.
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMAfterPrepare(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_AFTER_PREPARE = "AfterPrepare";
 
     /**
-     * Sets a flag so that the TM fails after it has received
-     * "prepared" messages from all RMs, but before it can log
-     * "committed".
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @return true on success, false on failure.
-     */
-    public boolean dieTMBeforeCommit()
-            throws RemoteException;
-
-    /**
-     * Sets a flag so that the TM fails right after it logs
-     * "committed".
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @return true on success, false on failure.
-     */
-    public boolean dieTMAfterCommit()
-            throws RemoteException;
-
-    /**
-     * Sets a flag so that the RM fails when it is told by the TM to
+     * The RM fails when it is told by the TM to
      * commit, by before it could actually change the database content
      * (i.e., die at beginning of the commit() function called by TM).
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMBeforeCommit(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
 
     /**
-     * Sets a flag so that the RM fails when it is told by the TM to
+     * The RM fails when it is told by the TM to
      * abort, by before it could actually do anything.  (i.e., die at
      * beginning of the abort() function called by TM).
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMBeforeAbort(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_BEFORE_ABORT = "BeforeAbort";
+
+
+    // The valid dieTime for TM
+
+    /**
+     * The TM fails after it has received
+     * "prepared" messages from all RMs, but before it can log
+     * "committed".
+     */
+    public static final String TM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
+
+    /**
+     * The TM fails right after it logs "committed".
+     */
+    public static final String TM_DIE_TIME_AFTER_COMMIT = "AfterCommit";
 
 
     /**

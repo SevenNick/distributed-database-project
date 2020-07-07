@@ -732,38 +732,27 @@ public class WorkflowControllerImpl
             throws RemoteException {
         if (who.equals(TransactionManager.RMIName) ||
                 who.equals("ALL")) {
-            try {
-                tm.dieNow();
-            } catch (RemoteException e) {
-            }
+            tm.dieNow();
         }
         if (who.equals(ResourceManager.RMINameFlights) ||
                 who.equals("ALL")) {
-            try {
-                rmFlights.dieNow();
-            } catch (RemoteException e) {
-            }
+            rmFlights.dieNow();
         }
         if (who.equals(ResourceManager.RMINameRooms) ||
                 who.equals("ALL")) {
-            try {
-                rmHotels.dieNow();
-            } catch (RemoteException e) {
-            }
+            rmHotels.dieNow();
         }
         if (who.equals(ResourceManager.RMINameCars) ||
                 who.equals("ALL")) {
-            try {
-                rmCars.dieNow();
-            } catch (RemoteException e) {
-            }
+            rmCars.dieNow();
         }
         if (who.equals(ResourceManager.RMINameCustomers) ||
                 who.equals("ALL")) {
-            try {
-                rmCustomers.dieNow();
-            } catch (RemoteException e) {
-            }
+            rmCustomers.dieNow();
+        }
+        if (who.equals(ResourceManager.RMINameReservations) ||
+                who.equals("ALL")) {
+            rmReservations.dieNow();
         }
         if (who.equals(WorkflowController.RMIName) ||
                 who.equals("ALL")) {
@@ -772,38 +761,50 @@ public class WorkflowControllerImpl
         return true;
     }
 
-    public boolean dieRMAfterEnlist(String who)
+    public boolean dieRM(String who, String dieTime)
             throws RemoteException {
+
+        // validate the dieTime first
+        if (!dieTime.equals(RM_DIE_TIME_AFTER_ENLIST) && !dieTime.equals(RM_DIE_TIME_AFTER_PREPARE)
+                && !dieTime.equals(RM_DIE_TIME_BEFORE_PREPARE) && !dieTime.equals(RM_DIE_TIME_BEFORE_COMMIT)
+                && !dieTime.equals(RM_DIE_TIME_BEFORE_ABORT)) {
+            System.out.println("Invalid die time:" + dieTime);
+            return false;
+        }
+
+        // Set die time according to who
+        switch (who) {
+            case ResourceManager.RMINameFlights:
+                rmFlights.setDieTime(dieTime);
+                break;
+            case ResourceManager.RMINameRooms:
+                rmHotels.setDieTime(dieTime);
+                break;
+            case ResourceManager.RMINameCars:
+                rmCars.setDieTime(dieTime);
+                break;
+            case ResourceManager.RMINameCustomers:
+                rmCustomers.setDieTime(dieTime);
+                break;
+            case ResourceManager.RMINameReservations:
+                rmReservations.setDieTime(dieTime);
+                break;
+            default:
+                System.out.println("Invalid who string: " + who);
+                return false;
+        }
+
         return true;
     }
 
-    public boolean dieRMBeforePrepare(String who)
+    public boolean dieTM(String dieTime)
             throws RemoteException {
-        return true;
-    }
 
-    public boolean dieRMAfterPrepare(String who)
-            throws RemoteException {
-        return true;
-    }
-
-    public boolean dieTMBeforeCommit()
-            throws RemoteException {
-        return true;
-    }
-
-    public boolean dieTMAfterCommit()
-            throws RemoteException {
-        return true;
-    }
-
-    public boolean dieRMBeforeCommit(String who)
-            throws RemoteException {
-        return true;
-    }
-
-    public boolean dieRMBeforeAbort(String who)
-            throws RemoteException {
+        if (!dieTime.equals(TM_DIE_TIME_BEFORE_COMMIT) && !dieTime.equals(TM_DIE_TIME_AFTER_COMMIT)) {
+            System.out.println("Invalid die time: " + dieTime);
+            return false;
+        }
+        tm.setDieTime(dieTime);
         return true;
     }
 }
