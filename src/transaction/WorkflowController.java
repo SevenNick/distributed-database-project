@@ -126,7 +126,7 @@ public interface WorkflowController extends Remote {
 
     /**
      * Delete rooms from a location.
-     * This subtracts from both the toal and the available room count
+     * This subtracts from both the total and the available room count
      * (rooms not allocated to a customer).  It should fail if it
      * would make the count of available rooms negative.
      *
