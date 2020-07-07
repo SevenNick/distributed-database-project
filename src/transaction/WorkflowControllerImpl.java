@@ -27,9 +27,8 @@ public class WorkflowControllerImpl
     protected ResourceManager rmReservations = null;
     protected TransactionManager tm = null;
 
-    // TODO: what is the table name
     private static final String TABLE_NAME_FLIGHT = "FLIGHTS";
-    private static final String TABLE_NAME_HOTEL = "ROOMS";
+    private static final String TABLE_NAME_HOTEL = "HOTELS";
     private static final String TABLE_NAME_CAR = "CARS";
     private static final String TABLE_NAME_CUSTOMER = "CUSTOMERS";
     private static final String TABLE_NAME_RESERVATION = "RESERVATIONS";

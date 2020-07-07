@@ -85,13 +85,11 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
                     if (tm == null) {
                         reconnect();
                         System.out.println("reconnect tm!");
-
                     }
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                     }
-
                 }
             }
         }.start();
@@ -672,6 +670,6 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             System.err.println(rmiName + " not bound:" + e);
             System.exit(1);
         }
-        
+
     }
 }
