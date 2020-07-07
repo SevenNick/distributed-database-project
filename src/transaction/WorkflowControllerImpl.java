@@ -54,8 +54,34 @@ public class WorkflowControllerImpl
 
 
     public WorkflowControllerImpl() throws RemoteException {
+        String rmiPort = System.getProperty("rmiPort");
+        if (rmiPort == null) {
+            rmiPort = "";
+        } else if (!rmiPort.equals("")) {
+            rmiPort = "//:" + rmiPort + "/";
+        }
+        // get reference of all RMs and TM
+        try {
+            rmFlights = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameFlights);
+            rmHotels= (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameRooms);
+            rmCars = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameCars);
+            rmCustomers = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameCustomers);
+            rmReservations = (ResourceManager) Naming.lookup(rmiPort+ResourceManager.RMINameReservations);
+
+            tm = (TransactionManager) Naming.lookup(rmiPort + TransactionManager.RMIName);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // using while to ensure all components can talk to each other finally after failure
         while (!reconnect()) {
-            // would be better to sleep a while
+            try {
+                Thread.sleep(1000);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
