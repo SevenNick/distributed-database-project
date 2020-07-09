@@ -72,29 +72,27 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             }
         }
 
-        new Thread() {
-            public void run() {
-                while (true) {
-                    try {
-                        if (tm != null)
-                            tm.ping();
-                    } catch (Exception e) {
-                        tm = null;
-                    }
+        new Thread(() -> {
+            while (true) {
+                try {
+                    if (tm != null)
+                        tm.ping();
+                } catch (Exception e) {
+                    tm = null;
+                }
 
-                    if (tm == null) {
-                        reconnect();
-                        System.out.println("reconnect tm!");
-
-                    }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                    }
+                if (tm == null) {
+                    reconnect();
+                    System.out.println("reconnect tm!");
 
                 }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                }
+
             }
-        }.start();
+        }).start();
     }
 
     public void ping() {
@@ -127,12 +125,12 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
                 continue;
             File[] xdatas = datas[i].listFiles();
             int xid = Integer.parseInt(datas[i].getName());
-            if (!xids.contains(new Integer(xid))) {
+            if (!xids.contains(xid)) {
                 //this should never happen;
                 throw new RuntimeException("ERROR: UNEXPECTED XID");
             }
-            for (int j = 0; j < xdatas.length; j++) {
-                RMTable xtable = getTable(xid, xdatas[j].getName());
+            for (File xdata : xdatas) {
+                RMTable xtable = getTable(xid, xdata.getName());
                 try {
                     xtable.relockAll();
                 } catch (DeadlockException e) {
@@ -478,7 +476,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             dieNow();
 
         RMTable table = getTable(xid, tablename);
-        ResourceItem item = (ResourceItem) table.get(newItem.getKey());
+        ResourceItem item = table.get(newItem.getKey());
         if (item != null && !item.isDeleted()) {
             return false;
         }
