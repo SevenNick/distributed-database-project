@@ -35,6 +35,9 @@ runrmcars : server
 runrmcustomers : server
 	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMCustomers -Djava.security.policy=./security-policy transaction.ResourceManagerImpl
 
+runrmreservations : server
+	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -DrmiName=RMReservations -Djava.security.policy=./security-policy transaction.ResourceManagerImpl
+
 runwc : server
 	$(PATH)/java -classpath $(PROJECTROOT) -DrmiPort=$(RMIREGPORT) -Djava.security.policy=./security-policy transaction.WorkflowControllerImpl
 

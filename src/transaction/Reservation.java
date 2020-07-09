@@ -15,7 +15,10 @@ import java.io.Serializable;
  * Preferences - Java - Code Style - Code Templates
  */
 public class Reservation implements ResourceItem, Serializable {
-    public static final String INDEX_CUSTNAME = "custName";
+
+    public static final String INDEX_CUSTOMER_NAME = "customerName";
+    public static final String INDEX_RESERVATION_TYPE = "reservationType";
+    public static final String INDEX_RESERVATION_KEY = "reservationKey";
 
     public static final int RESERVATION_TYPE_FLIGHT = 1;
 
@@ -23,72 +26,78 @@ public class Reservation implements ResourceItem, Serializable {
 
     public static final int RESERVATION_TYPE_CAR = 3;
 
-    protected String custName;
+    protected String customerName;
 
-    protected int resvType;
+    protected int reservationType;
 
-    protected String resvKey;
+    protected String reservationKey;
 
-    protected boolean isdeleted = false;
+    protected boolean isDeleted = false;
 
-    public Reservation(String custName, int resvType, String resvKey) {
-        this.custName = custName;
-        this.resvType = resvType;
-        this.resvKey = resvKey;
+    public Reservation(String customerName, int reservationType, String reservationKey) {
+        this.customerName = customerName;
+        this.reservationType = reservationType;
+        this.reservationKey = reservationKey;
     }
 
     public String[] getColumnNames() {
-        return new String[]{"custName", "resvType", "resvKey"};
+        return new String[]{INDEX_CUSTOMER_NAME, INDEX_RESERVATION_TYPE, INDEX_RESERVATION_KEY};
     }
 
     public String[] getColumnValues() {
-        return new String[]{custName, "" + resvType, "" + resvKey};
+        return new String[]{customerName, "" + reservationType, "" + reservationKey};
     }
 
     public Object getIndex(String indexName) throws InvalidIndexException {
-        if (indexName.equals(INDEX_CUSTNAME))
-            return custName;
-        else
-            throw new InvalidIndexException(indexName);
+        switch (indexName) {
+            case INDEX_CUSTOMER_NAME:
+                return customerName;
+            case INDEX_RESERVATION_TYPE:
+                return reservationType;
+            case INDEX_RESERVATION_KEY:
+                return reservationKey;
+            default:
+                throw new InvalidIndexException(indexName);
+        }
     }
 
     public Object getKey() {
-        return new ReservationKey(custName, resvType, resvKey);
+        return new ReservationKey(customerName, reservationType, reservationKey);
     }
 
     /**
-     * @return Returns the custName.
+     * @return Returns the customerName.
      */
-    public String getCustName() {
-        return custName;
+    public String getCustomerName() {
+        return customerName;
     }
 
     /**
-     * @return Returns the resvKey.
+     * @return Returns the reservationKey.
      */
-    public String getResvKey() {
-        return resvKey;
+    public String getReservationKey() {
+        return reservationKey;
     }
 
     /**
-     * @return Returns the resvType.
+     * @return Returns the reservationType.
      */
-    public int getResvType() {
-        return resvType;
+    public int getReservationType() {
+        return reservationType;
     }
 
     public boolean isDeleted() {
-        return isdeleted;
+        return isDeleted;
     }
 
     public void delete() {
-        isdeleted = true;
+        isDeleted = true;
     }
 
     public Object clone() {
-        Reservation o = new Reservation(getCustName(), getResvType(),
-                getResvKey());
-        o.isdeleted = isdeleted;
+        Reservation o = new Reservation(getCustomerName(), getReservationType(),
+                getReservationKey());
+        o.isDeleted = isDeleted;
         return o;
     }
 }

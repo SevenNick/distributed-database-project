@@ -12,8 +12,10 @@ public class TransactionManagerImpl
         extends java.rmi.server.UnicastRemoteObject
         implements TransactionManager {
 
+    private String dieTime;
+
+
     public static void main(String args[]) {
-//        System.setSecurityManager(new RMISecurityManager());
         String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
             rmiPort = "";
@@ -42,9 +44,32 @@ public class TransactionManagerImpl
 
     public boolean dieNow()
             throws RemoteException {
+
         System.exit(1);
-        return true; // We won't ever get here since we exited above;
+
+        // We won't ever get here since we exited above;
         // but we still need it to please the compiler.
+        return true;
     }
 
+    @Override
+    public void setDieTime(String time) throws RemoteException {
+        this.dieTime = time;
+        System.out.println("Die time set to : " + time);
+    }
+
+    @Override
+    public int start() throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public boolean commit() throws RemoteException, TransactionAbortedException, InvalidTransactionException {
+        return false;
+    }
+
+    @Override
+    public void abort() throws RemoteException, InvalidTransactionException {
+
+    }
 }

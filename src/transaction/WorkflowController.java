@@ -126,7 +126,7 @@ public interface WorkflowController extends Remote {
 
     /**
      * Delete rooms from a location.
-     * This subtracts from both the toal and the available room count
+     * This subtracts from both the total and the available room count
      * (rooms not allocated to a customer).  It should fail if it
      * would make the count of available rooms negative.
      *
@@ -177,14 +177,14 @@ public interface WorkflowController extends Remote {
      * Add a new customer to database.  Should return success if
      * customer already exists.
      *
-     * @param xid      id of transaction.
-     * @param custName name of customer.
+     * @param xid          id of transaction.
+     * @param customerName name of customer.
      * @return true on success, false on failure.
      * @throws RemoteException             on communications failure.
      * @throws TransactionAbortedException if transaction was aborted.
      * @throws InvalidTransactionException if transaction id is invalid.
      */
-    public boolean newCustomer(int xid, String custName)
+    public boolean newCustomer(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -192,14 +192,14 @@ public interface WorkflowController extends Remote {
     /**
      * Delete this customer and un-reserve associated reservations.
      *
-     * @param xid      id of transaction.
-     * @param custName name of customer.
-     * @return true on success, false on failure. (custName==null or doesn't exist...)
+     * @param xid          id of transaction.
+     * @param customerName name of customer.
+     * @return true on success, false on failure. (customerName==null or doesn't exist...)
      * @throws RemoteException             on communications failure.
      * @throws TransactionAbortedException if transaction was aborted.
      * @throws InvalidTransactionException if transaction id is invalid.
      */
-    public boolean deleteCustomer(int xid, String custName)
+    public boolean deleteCustomer(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -264,8 +264,8 @@ public interface WorkflowController extends Remote {
             TransactionAbortedException,
             InvalidTransactionException;
 
-    /* Return the total price of all reservations held for a customer. Return -1 if custName==null or doesn't exist.*/
-    public int queryCustomerBill(int xid, String custName)
+    /* Return the total price of all reservations held for a customer. Return -1 if customerName==null or doesn't exist.*/
+    public int queryCustomerBill(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -278,15 +278,15 @@ public interface WorkflowController extends Remote {
     /**
      * Reserve a flight on behalf of this customer.
      *
-     * @param xid       id of transaction.
-     * @param custName  name of customer.
-     * @param flightNum flight number.
+     * @param xid          id of transaction.
+     * @param customerName name of customer.
+     * @param flightNum    flight number.
      * @return true on success, false on failure. (cust or flight doesn't exist; no seats left...)
      * @throws RemoteException             on communications failure.
      * @throws TransactionAbortedException if transaction was aborted.
      * @throws InvalidTransactionException if transaction id is invalid.
      */
-    public boolean reserveFlight(int xid, String custName, String flightNum)
+    public boolean reserveFlight(int xid, String customerName, String flightNum)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -294,7 +294,7 @@ public interface WorkflowController extends Remote {
     /**
      * Reserve a car for this customer at the specified location.
      */
-    public boolean reserveCar(int xid, String custName, String location)
+    public boolean reserveCar(int xid, String customerName, String location)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -302,7 +302,7 @@ public interface WorkflowController extends Remote {
     /**
      * Reserve a room for this customer at the specified location.
      */
-    public boolean reserveRoom(int xid, String custName, String location)
+    public boolean reserveRoom(int xid, String customerName, String location)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
@@ -338,92 +338,79 @@ public interface WorkflowController extends Remote {
             throws RemoteException;
 
     /**
-     * Sets a flag so that the RM fails after the next enlist()
-     * operation.  That is, the RM immediately dies on return of the
+     * Sets a flag so that the RM fails at the dieTime
+     * <p>
+     * This method is used for testing and is not part of a transaction.
+     *
+     * @param who     which RM to kill; must be "RMFlights", "RMRooms", "RMCars", "RMCustomers". or "RMReservations".
+     * @param dieTime when to kill RM; must be "AfterEnlist", "BeforePrepare", "AfterPrepare", "BeforeCommit", or "BeforeAbort".
+     * @return true on success, false on failure.
+     */
+    public boolean dieRM(String who, String dieTime)
+            throws RemoteException;
+
+    /**
+     * Sets a flag so that the TM fails at the dieTime
+     * <p>
+     * This method is used for testing and is not part of a transaction.
+     *
+     * @param dieTime when to kill RM; must be "BeforeCommit" or "AfterCommit".
+     * @return true on success, false on failure.
+     */
+    public boolean dieTM(String dieTime)
+            throws RemoteException;
+
+    // The valid dieTime for dieRM.
+
+    /**
+     * The RM fails after the next enlist() operation.
+     * That is, the RM immediately dies on return of the
      * enlist() call it made to the TM, before it could fulfil the
      * client's query/reservation request.
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMAfterEnlist(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_AFTER_ENLIST = "AfterEnlist";
 
     /**
-     * Sets a flag so that the RM fails when it next tries to prepare,
+     * The RM fails when it next tries to prepare,
      * but before it gets a chance to save the update list to disk.
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMBeforePrepare(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_BEFORE_PREPARE = "BeforePrepare";
 
     /**
-     * Sets a flag so that the RM fails when it next tries to prepare:
+     * The RM fails when it next tries to prepare:
      * after it has entered the prepared state, but just before it
      * could reply "prepared" to the TM.
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMAfterPrepare(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_AFTER_PREPARE = "AfterPrepare";
 
     /**
-     * Sets a flag so that the TM fails after it has received
-     * "prepared" messages from all RMs, but before it can log
-     * "committed".
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @return true on success, false on failure.
-     */
-    public boolean dieTMBeforeCommit()
-            throws RemoteException;
-
-    /**
-     * Sets a flag so that the TM fails right after it logs
-     * "committed".
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @return true on success, false on failure.
-     */
-    public boolean dieTMAfterCommit()
-            throws RemoteException;
-
-    /**
-     * Sets a flag so that the RM fails when it is told by the TM to
+     * The RM fails when it is told by the TM to
      * commit, by before it could actually change the database content
      * (i.e., die at beginning of the commit() function called by TM).
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMBeforeCommit(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
 
     /**
-     * Sets a flag so that the RM fails when it is told by the TM to
+     * The RM fails when it is told by the TM to
      * abort, by before it could actually do anything.  (i.e., die at
      * beginning of the abort() function called by TM).
-     * <p>
-     * This method is used for testing and is not part of a transaction.
-     *
-     * @param who which RM to kill; must be "RMFlights", "RMRooms", "RMCars", or "RMCustomers".
-     * @return true on success, false on failure.
      */
-    public boolean dieRMBeforeAbort(String who)
-            throws RemoteException;
+    public static final String RM_DIE_TIME_BEFORE_ABORT = "BeforeAbort";
+
+
+    // The valid dieTime for TM
+
+    /**
+     * The TM fails after it has received
+     * "prepared" messages from all RMs, but before it can log
+     * "committed".
+     */
+    public static final String TM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
+
+    /**
+     * The TM fails right after it logs "committed".
+     */
+    public static final String TM_DIE_TIME_AFTER_COMMIT = "AfterCommit";
 
 
     /**
