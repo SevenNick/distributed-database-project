@@ -164,6 +164,8 @@ public class TransactionManagerImpl
         boolean prepared = tx.prepare();
         if (prepared)
             tx.commit();
+        else
+            tx.abort();
         storeLog();
 //        else throw new TransactionAbortedException(xid, "tx aborted");
 
