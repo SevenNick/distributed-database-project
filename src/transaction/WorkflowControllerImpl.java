@@ -94,13 +94,13 @@ public class WorkflowControllerImpl
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException {
-        return tm.commit();
+        return tm.commit(xid);
     }
 
     public void abort(int xid)
             throws RemoteException,
             InvalidTransactionException {
-        tm.abort();
+        tm.abort(xid);
     }
 
 

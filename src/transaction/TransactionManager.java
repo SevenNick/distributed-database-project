@@ -19,16 +19,16 @@ public interface TransactionManager extends Remote {
 
     public void ping() throws RemoteException;
 
-    public void enlist(int xid, ResourceManager rm) throws RemoteException;
+    public void enlist(int xid, ResourceManager rm) throws RemoteException, InvalidTransactionException;
 
 
     // Below is add by xsh because TM need them!
 
     int start() throws RemoteException;
 
-    boolean commit() throws RemoteException, TransactionAbortedException, InvalidTransactionException;
+    boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException;
 
-    void abort() throws RemoteException, InvalidTransactionException;
+    void abort(int xid) throws RemoteException, InvalidTransactionException;
 
 
     /**
