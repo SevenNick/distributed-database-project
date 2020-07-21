@@ -20,7 +20,7 @@ import static transaction.WorkflowController.TM_DIE_TIME_BEFORE_COMMIT;
 public class TransactionManagerImpl
         extends java.rmi.server.UnicastRemoteObject
         implements TransactionManager, Serializable {
-    private static final String TM_LOG_FILENAME = "TM.log";
+    private static final String TM_LOG_FILENAME = "data/TM.log";
 
     private String dieTime;
     private int curXid;
@@ -43,6 +43,11 @@ public class TransactionManagerImpl
             this.state = TransactionState.proceeding;
         }
 
+        @Override
+        public String toString() {
+            return "Transaction{" + "xid=" + xid + ", rms=" + rms.size() + ", state=" + state + '}';
+        }
+
         synchronized void enlist(ResourceManager rm) throws InvalidTransactionException, RemoteException {
             if (this.state == TransactionState.proceeding) {
                 rms.add(rm);
@@ -58,8 +63,10 @@ public class TransactionManagerImpl
         }
 
         synchronized void checkDone() { // TODO: need rename
-            if (rms.isEmpty())
+            if (rms.isEmpty()) {
+                System.out.println("TX " + xid + " is done.");
                 txs.remove(xid);
+            }
         }
 
         synchronized boolean prepare() throws InvalidTransactionException, RemoteException {
@@ -74,14 +81,25 @@ public class TransactionManagerImpl
             terminate();
         }
 
+        synchronized void abort() {
+            this.state = TransactionState.abort;
+            terminate();
+        }
+
         synchronized void terminate() {
+            if (state == TransactionState.proceeding) return;
+            System.out.format("%s starts terminating.\n", this.toString());
             Set<ResourceManager> toRemove = new HashSet<>();
             for (ResourceManager rm : rms) {
                 try {
-                    if (this.state == TransactionState.abort)
-                        rm.abort(xid);
-                    else if (this.state == TransactionState.commit)
-                        rm.commit(xid);
+                    switch (this.state) {
+                        case abort:
+                            rm.abort(xid);
+                            break;
+                        case commit:
+                            rm.commit(xid);
+                            break;
+                    }
                     toRemove.add(rm);
                 } catch (RemoteException | InvalidTransactionException ignored) {
                 }
@@ -89,25 +107,31 @@ public class TransactionManagerImpl
             rms.removeAll(toRemove);
             checkDone();
         }
-
-        synchronized void abort() {
-            this.state = TransactionState.abort;
-            terminate();
-        }
     }
 
     private Transaction getTx(int xid) throws InvalidTransactionException {
         if (xid < 0)
             throw new InvalidTransactionException(xid, "Xid must be positive");
-        if (txs.containsKey(xid))
+        if (!txs.containsKey(xid))
             throw new InvalidTransactionException(xid, "Xid is not exist");
         return txs.get(xid);
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionManagerImpl{" +
+                "dieTime='" + dieTime + '\'' +
+                ", curXid=" + curXid +
+                ", txs=" + txs +
+                '}';
     }
 
     public TransactionManagerImpl() throws RemoteException {
         curXid = 1;
         txs = new Hashtable<>();
+        dieTime = "";
         loadLog();
+        System.out.println(this);
         recover();
     }
 
@@ -139,7 +163,7 @@ public class TransactionManagerImpl
     }
 
     @Override
-    public synchronized int start() throws RemoteException {
+    public synchronized int start() {
         int xid = curXid++;
         txs.put(xid, new Transaction(xid));
         storeLog();
@@ -153,10 +177,8 @@ public class TransactionManagerImpl
         storeLog();
     }
 
-    // TODO: must transaction immediately abort if it is failed to commit?
-
     @Override
-    public boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
+    public boolean commit(int xid) throws RemoteException, InvalidTransactionException {
         if (dieTime.equals(TM_DIE_TIME_BEFORE_COMMIT))
             dieNow();
 
@@ -167,7 +189,6 @@ public class TransactionManagerImpl
         else
             tx.abort();
         storeLog();
-//        else throw new TransactionAbortedException(xid, "tx aborted");
 
         if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT))
             dieNow();
@@ -177,13 +198,13 @@ public class TransactionManagerImpl
 
 
     @Override
-    public void abort(int xid) throws RemoteException, InvalidTransactionException {
+    public void abort(int xid) throws InvalidTransactionException {
         Transaction tx = getTx(xid);
         tx.abort();
         storeLog();
     }
 
-    public boolean dieNow() throws RemoteException {
+    public boolean dieNow() {
         System.exit(1);
         // We won't ever get here since we exited above;
         // but we still need it to please the compiler.
@@ -191,12 +212,12 @@ public class TransactionManagerImpl
     }
 
     @Override
-    public void setDieTime(String time) throws RemoteException {
+    public void setDieTime(String time) {
         this.dieTime = time;
         System.out.println("Die time set to : " + time);
     }
 
-    public void ping() throws RemoteException {
+    public void ping() {
     }
 
     public static void main(String[] args) {

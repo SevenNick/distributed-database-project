@@ -1,6 +1,6 @@
 package transaction;
 
-import java.rmi.*;
+import java.rmi.Naming;
 
 /**
  * A toy client of the Distributed Travel Reservation System.
@@ -28,23 +28,18 @@ public class Client {
         try {
             int xid = wc.start();
 
-            if (!wc.addFlight(xid, "347", 230, 999)) {
-                System.err.println("Add flight failed");
-            }
-            if (!wc.addRooms(xid, "SFO", 500, 150)) {
-                System.err.println("Add room failed");
+            String flightNum = "347";
+            String customerName = "John";
+
+            if (!wc.newCustomer(xid, customerName)) {
+                System.err.println("Add customer failed");
             }
 
-            System.out.println("Flight 347 has " +
-                    wc.queryFlight(xid, "347") +
-                    " seats.");
-            if (!wc.reserveFlight(xid, "John", "347")) {
+            System.out.println("Flight 347 has " + wc.queryFlight(xid, flightNum) + " seats.");
+            if (!wc.reserveFlight(xid, customerName, flightNum)) {
                 System.err.println("Reserve flight failed");
             }
-            System.out.println("Flight 347 now has " +
-                    wc.queryFlight(xid, "347") +
-                    " seats.");
-
+            System.out.println("Flight 347 now has " + wc.queryFlight(xid, flightNum) + " seats.");
             if (!wc.commit(xid)) {
                 System.err.println("Commit failed");
             }
