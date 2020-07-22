@@ -69,25 +69,27 @@ public class TransactionManagerImpl
             }
         }
 
-        synchronized boolean prepare() throws InvalidTransactionException, RemoteException {
+        synchronized boolean prepare() {
             boolean ret = true;
-            for (ResourceManager rm : rms)
-                ret &= rm.prepare(xid);
+            try {
+                for (ResourceManager rm : rms)
+                    ret &= rm.prepare(xid);
+            }
+            catch (RemoteException e) {
+                ret = false;
+            }
+            catch (InvalidTransactionException ignored){}
             return ret;
         }
 
-        synchronized void commit() {
-            this.state = TransactionState.commit;
-            terminate();
-        }
-
-        synchronized void abort() {
-            this.state = TransactionState.abort;
-            terminate();
+        synchronized void setState(TransactionState state) {
+            this.state = state;
         }
 
         synchronized void terminate() {
-            if (state == TransactionState.proceeding) return;
+            if (state == TransactionState.proceeding) {
+                state = TransactionState.abort;
+            }
             System.out.format("%s starts terminating.\n", this.toString());
             Set<ResourceManager> toRemove = new HashSet<>();
             for (ResourceManager rm : rms) {
@@ -184,11 +186,14 @@ public class TransactionManagerImpl
 
         Transaction tx = getTx(xid);
         boolean prepared = tx.prepare();
+
         if (prepared)
-            tx.commit();
+            tx.setState(TransactionState.commit);
         else
-            tx.abort();
+            tx.setState(TransactionState.abort);
         storeLog();
+
+        tx.terminate();
 
         if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT))
             dieNow();
@@ -200,8 +205,9 @@ public class TransactionManagerImpl
     @Override
     public void abort(int xid) throws InvalidTransactionException {
         Transaction tx = getTx(xid);
-        tx.abort();
+        tx.setState(TransactionState.abort);
         storeLog();
+        tx.terminate();
     }
 
     public boolean dieNow() {
