@@ -143,7 +143,8 @@ public class TransactionManagerImpl
             this.dieTime = tmLog.dieTime;
             this.txs = tmLog.txs;
             this.curXid = tmLog.curXid;
-        } catch (IOException | ClassNotFoundException ignore) {
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
@@ -158,7 +159,8 @@ public class TransactionManagerImpl
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(logFile))) {
             oos.writeObject(this);
             oos.flush();
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -185,12 +187,9 @@ public class TransactionManagerImpl
         Transaction tx = getTx(xid);
         boolean prepared = tx.prepare();
 
-        if (prepared)
-            tx.setState(TransactionState.commit);
-        else
-            tx.setState(TransactionState.abort);
+        if (prepared) tx.setState(TransactionState.commit);
+        else tx.setState(TransactionState.abort);
         storeLog();
-
         tx.terminate();
 
         if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT))
