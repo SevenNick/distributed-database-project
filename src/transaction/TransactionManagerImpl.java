@@ -103,10 +103,8 @@ public class TransactionManagerImpl
     }
 
     private Transaction getTx(int xid) throws InvalidTransactionException {
-        if (xid < 0)
-            throw new InvalidTransactionException(xid, "Xid must be positive");
-        if (!txs.containsKey(xid))
-            throw new InvalidTransactionException(xid, "Xid is not exist");
+        if (xid < 0) throw new InvalidTransactionException(xid, "Xid must be positive");
+        if (!txs.containsKey(xid)) throw new InvalidTransactionException(xid, "Xid is not exist");
         return txs.get(xid);
     }
 
@@ -128,7 +126,6 @@ public class TransactionManagerImpl
         recover();
     }
 
-    // load from tm log;
     private void loadLog() {
         File logFile = new File(TM_LOG_FILENAME);
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(logFile))) {
@@ -142,9 +139,8 @@ public class TransactionManagerImpl
     }
 
     private void recover() {
-        for (Transaction tx : txs.values()) {
+        for (Transaction tx : txs.values())
             tx.terminate();
-        }
     }
 
     private void storeLog() {
