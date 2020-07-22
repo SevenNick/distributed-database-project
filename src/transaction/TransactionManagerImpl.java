@@ -54,17 +54,17 @@ public class TransactionManagerImpl
             } else if (this.state == TransactionState.commit && rms.contains(rm)) {
                 rm.commit(this.xid);
                 rms.remove(rm);
-                checkDone();
+                checkTerminated();
             } else if (this.state == TransactionState.abort && rms.contains(rm)) {
                 rm.abort(this.xid);
                 rms.remove(rm);
-                checkDone();
+                checkTerminated();
             }
         }
 
-        synchronized void checkDone() { // TODO: need rename
+        synchronized void checkTerminated() {
             if (rms.isEmpty()) {
-                System.out.println("TX " + xid + " is done.");
+                System.out.println("TX " + xid + " is terminated.");
                 txs.remove(xid);
             }
         }
@@ -98,7 +98,7 @@ public class TransactionManagerImpl
                 }
             }
             rms.removeAll(toRemove);
-            checkDone();
+            checkTerminated();
         }
     }
 
