@@ -32,7 +32,7 @@ public class TransactionManagerImpl
         abort
     }
 
-    class Transaction {
+    private class Transaction {
         int xid;
         Set<ResourceManager> rms;
         TransactionState state;
