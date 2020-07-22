@@ -85,21 +85,14 @@ public class TransactionManagerImpl
         }
 
         synchronized void terminate() {
-            if (state == TransactionState.proceeding) {
+            if (state == TransactionState.proceeding)
                 state = TransactionState.abort;
-            }
             System.out.format("%s starts terminating.\n", this.toString());
             Set<ResourceManager> toRemove = new HashSet<>();
             for (ResourceManager rm : rms) {
                 try {
-                    switch (this.state) {
-                        case abort:
-                            rm.abort(xid);
-                            break;
-                        case commit:
-                            rm.commit(xid);
-                            break;
-                    }
+                    if (this.state == TransactionState.abort) rm.abort(xid);
+                    else if (this.state == TransactionState.commit) rm.commit(xid);
                     toRemove.add(rm);
                 } catch (RemoteException | InvalidTransactionException ignored) {
                 }
