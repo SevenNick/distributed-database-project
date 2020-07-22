@@ -74,11 +74,9 @@ public class TransactionManagerImpl
             try {
                 for (ResourceManager rm : rms)
                     ret &= rm.prepare(xid);
-            }
-            catch (RemoteException e) {
+            } catch (RemoteException | InvalidTransactionException e) {
                 ret = false;
             }
-            catch (InvalidTransactionException ignored){}
             return ret;
         }
 
