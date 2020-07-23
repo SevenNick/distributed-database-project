@@ -4,17 +4,38 @@ PATH = /usr/bin
 JUNIT_PATH = /usr/share/java/junit-4.12.jar
 HAMCREST_PATH = /usr/share/java/hamcrest-core-1.3.jar
 
-all : normal
+all : normal_test failure_test
 
-normal: NormalTest.class
+normal_test : NormalTest.class
 
-run_normal_test : normal
+failure_test: RMAfterEnlistFailureTest.class \
+              RMBeforePrepareFailureTest.class \
+              RMAfterPrepareFailureTest.class \
+              RMBeforeCommitFailureTest.class \
+              RMBeforeAbortFailureTest.class
+
+run_normal_test : normal_test
 	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.NormalTest
 
-%.class : %.java
-	$(PATH)/javac -classpath $(PROJECT_ROOT):$(JUNIT_PATH) $<
+run_rm_after_enlist_failure_test: failure_test
+	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.RMAfterEnlistFailureTest
+
+run_rm_before_prepare_failure_test: failure_test
+	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.RMBeforePrepareFailureTest
+
+run_rm_after_prepare_failure_test: failure_test
+	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.RMAfterPrepareFailureTest
+
+run_rm_before_commit_failure_test: failure_test
+	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.RMBeforeCommitFailureTest
+
+run_rm_before_abort_failure_test: failure_test
+	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.RMBeforeAbortFailureTest
+
+%.class : %.java ReservationSystemTest.java
+	$(PATH)/javac -classpath $(PROJECT_ROOT):$(JUNIT_PATH) $< ReservationSystemTest.java
 
 clean:
 	/bin/rm *.class
 
-.PHONY : run_normal_test clean
+.PHONY : clean

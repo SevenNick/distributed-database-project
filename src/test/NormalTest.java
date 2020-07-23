@@ -1,12 +1,9 @@
 package test;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import transaction.InvalidTransactionException;
 import transaction.TransactionAbortedException;
-import transaction.WorkflowController;
 
-import java.rmi.Naming;
 import java.rmi.RemoteException;
 
 import static org.junit.Assert.*;
