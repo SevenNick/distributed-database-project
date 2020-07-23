@@ -26,13 +26,13 @@ public class TransactionManagerImpl
     private int curXid;
     private Map<Integer, Transaction> txs;
 
-    enum TransactionState {
+    enum TransactionState implements Serializable {
         proceeding,
         commit,
         abort
     }
 
-    private class Transaction {
+    private class Transaction implements Serializable {
         int xid;
         Set<ResourceManager> rms;
         TransactionState state;
@@ -133,7 +133,8 @@ public class TransactionManagerImpl
             this.dieTime = tmLog.dieTime;
             this.txs = tmLog.txs;
             this.curXid = tmLog.curXid;
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException ignored) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
