@@ -18,24 +18,7 @@ import static org.junit.Assert.*;
  * affect the whole system.
  */
 
-public class NormalTest {
-    private static WorkflowController wc;
-
-    @BeforeClass
-    public static void initial() {
-        String rmiPort = System.getProperty("rmiPort");
-        if (rmiPort == null) {
-            rmiPort = "";
-        } else if (!rmiPort.equals("")) {
-            rmiPort = "//:" + rmiPort + "/";
-        }
-
-        try {
-            wc = (WorkflowController) Naming.lookup(rmiPort + WorkflowController.RMIName);
-        } catch (Exception e) {
-            System.exit(1);
-        }
-    }
+public class NormalTest extends ReservationSystemTest {
 
     @Test
     public void testAddFlightAndQueryFlight() {
