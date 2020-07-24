@@ -34,6 +34,56 @@ public interface WorkflowController extends Remote {
     //////////
 
     /**
+     * The RM fails after the next enlist() operation.
+     * That is, the RM immediately dies on return of the
+     * enlist() call it made to the TM, before it could fulfil the
+     * client's query/reservation request.
+     */
+    public static final String RM_DIE_TIME_AFTER_ENLIST = "AfterEnlist";
+    /**
+     * The RM fails when it next tries to prepare,
+     * but before it gets a chance to save the update list to disk.
+     */
+    public static final String RM_DIE_TIME_BEFORE_PREPARE = "BeforePrepare";
+    /**
+     * The RM fails when it next tries to prepare:
+     * after it has entered the prepared state, but just before it
+     * could reply "prepared" to the TM.
+     */
+    public static final String RM_DIE_TIME_AFTER_PREPARE = "AfterPrepare";
+
+
+    //////////
+    // ADMINISTRATIVE INTERFACE
+    //////////
+    /**
+     * The RM fails when it is told by the TM to
+     * commit, by before it could actually change the database content
+     * (i.e., die at beginning of the commit() function called by TM).
+     */
+    public static final String RM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
+    /**
+     * The RM fails when it is told by the TM to
+     * abort, by before it could actually do anything.  (i.e., die at
+     * beginning of the abort() function called by TM).
+     */
+    public static final String RM_DIE_TIME_BEFORE_ABORT = "BeforeAbort";
+    /**
+     * The TM fails after it has received
+     * "prepared" messages from all RMs, but before it can log
+     * "committed".
+     */
+    public static final String TM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
+    /**
+     * The TM fails right after it logs "committed".
+     */
+    public static final String TM_DIE_TIME_AFTER_COMMIT = "AfterCommit";
+    /**
+     * The RMI name a WorkflowController binds to.
+     */
+    public static final String RMIName = "WC";
+
+    /**
      * Start a new transaction, and return its transaction id.
      *
      * @return A unique transaction ID > 0.  Return <=0 if server is not accepting new transactions.
@@ -69,7 +119,7 @@ public interface WorkflowController extends Remote {
 
 
     //////////
-    // ADMINISTRATIVE INTERFACE
+    // QUERY INTERFACE
     //////////
 
     /**
@@ -189,6 +239,11 @@ public interface WorkflowController extends Remote {
             TransactionAbortedException,
             InvalidTransactionException;
 
+
+    //////////
+    // RESERVATION INTERFACE
+    //////////
+
     /**
      * Delete this customer and un-reserve associated reservations.
      *
@@ -203,11 +258,6 @@ public interface WorkflowController extends Remote {
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
-
-
-    //////////
-    // QUERY INTERFACE
-    //////////
 
     /**
      * Return the number of empty seats on a flight.
@@ -231,6 +281,10 @@ public interface WorkflowController extends Remote {
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
+
+    //////////
+    // TECHNICAL/TESTING INTERFACE
+    //////////
 
     /**
      * Return the number of rooms available at a location.
@@ -264,16 +318,13 @@ public interface WorkflowController extends Remote {
             TransactionAbortedException,
             InvalidTransactionException;
 
+    // The valid dieTime for dieRM.
+
     /* Return the total price of all reservations held for a customer. Return -1 if customerName==null or doesn't exist.*/
     public int queryCustomerBill(int xid, String customerName)
             throws RemoteException,
             TransactionAbortedException,
             InvalidTransactionException;
-
-
-    //////////
-    // RESERVATION INTERFACE
-    //////////
 
     /**
      * Reserve a flight on behalf of this customer.
@@ -307,10 +358,6 @@ public interface WorkflowController extends Remote {
             TransactionAbortedException,
             InvalidTransactionException;
 
-    //////////
-    // TECHNICAL/TESTING INTERFACE
-    //////////
-
     /**
      * If some component has died and was restarted, this function is
      * called to refresh the RMI references so that everybody can talk
@@ -324,6 +371,9 @@ public interface WorkflowController extends Remote {
      */
     public boolean reconnect()
             throws RemoteException;
+
+
+    // The valid dieTime for TM
 
     /**
      * Kill the component immediately.  Used to simulate a system
@@ -359,62 +409,4 @@ public interface WorkflowController extends Remote {
      */
     public boolean dieTM(String dieTime)
             throws RemoteException;
-
-    // The valid dieTime for dieRM.
-
-    /**
-     * The RM fails after the next enlist() operation.
-     * That is, the RM immediately dies on return of the
-     * enlist() call it made to the TM, before it could fulfil the
-     * client's query/reservation request.
-     */
-    public static final String RM_DIE_TIME_AFTER_ENLIST = "AfterEnlist";
-
-    /**
-     * The RM fails when it next tries to prepare,
-     * but before it gets a chance to save the update list to disk.
-     */
-    public static final String RM_DIE_TIME_BEFORE_PREPARE = "BeforePrepare";
-
-    /**
-     * The RM fails when it next tries to prepare:
-     * after it has entered the prepared state, but just before it
-     * could reply "prepared" to the TM.
-     */
-    public static final String RM_DIE_TIME_AFTER_PREPARE = "AfterPrepare";
-
-    /**
-     * The RM fails when it is told by the TM to
-     * commit, by before it could actually change the database content
-     * (i.e., die at beginning of the commit() function called by TM).
-     */
-    public static final String RM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
-
-    /**
-     * The RM fails when it is told by the TM to
-     * abort, by before it could actually do anything.  (i.e., die at
-     * beginning of the abort() function called by TM).
-     */
-    public static final String RM_DIE_TIME_BEFORE_ABORT = "BeforeAbort";
-
-
-    // The valid dieTime for TM
-
-    /**
-     * The TM fails after it has received
-     * "prepared" messages from all RMs, but before it can log
-     * "committed".
-     */
-    public static final String TM_DIE_TIME_BEFORE_COMMIT = "BeforeCommit";
-
-    /**
-     * The TM fails right after it logs "committed".
-     */
-    public static final String TM_DIE_TIME_AFTER_COMMIT = "AfterCommit";
-
-
-    /**
-     * The RMI name a WorkflowController binds to.
-     */
-    public static final String RMIName = "WC";
 }

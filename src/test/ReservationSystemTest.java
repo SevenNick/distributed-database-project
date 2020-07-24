@@ -9,7 +9,7 @@ public class ReservationSystemTest {
     static WorkflowController wc;
 
     @BeforeClass
-    public static void initial() {
+    public static void getWorkflowController() {
         String rmiPort = System.getProperty("rmiPort");
         if (rmiPort == null) {
             rmiPort = "";

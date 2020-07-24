@@ -12,6 +12,11 @@ import java.rmi.RemoteException;
  */
 
 public interface TransactionManager extends Remote {
+    /**
+     * The RMI name a TransactionManager binds to.
+     */
+    public static final String RMIName = "TM";
+
     public boolean dieNow()
             throws RemoteException;
 
@@ -19,21 +24,15 @@ public interface TransactionManager extends Remote {
 
     public void ping() throws RemoteException;
 
-    public void enlist(int xid, ResourceManager rm) throws RemoteException, InvalidTransactionException;
-
 
     // Below is add by xsh because TM need them!
+
+    public void enlist(int xid, ResourceManager rm) throws RemoteException, InvalidTransactionException;
 
     int start() throws RemoteException;
 
     boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException;
 
     void abort(int xid) throws RemoteException, InvalidTransactionException;
-
-
-    /**
-     * The RMI name a TransactionManager binds to.
-     */
-    public static final String RMIName = "TM";
 
 }

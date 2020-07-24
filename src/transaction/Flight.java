@@ -68,28 +68,28 @@ public class Flight implements ResourceItem, Serializable {
         return flightNum;
     }
 
-    public int getPrice() {
-        return price;
-    }
-
-    public int getNumSeats() {
-        return numSeats;
-    }
-
-    public int getNumAvail() {
-        return numAvail;
-    }
-
     public void setFlightNum(String flightNum) {
         this.flightNum = flightNum;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public void setPrice(int price) {
         this.price = price;
     }
 
+    public int getNumSeats() {
+        return numSeats;
+    }
+
     public void setNumSeats(int numSeats) {
         this.numSeats = numSeats;
+    }
+
+    public int getNumAvail() {
+        return numAvail;
     }
 
     public void setNumAvail(int numAvail) {

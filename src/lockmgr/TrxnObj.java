@@ -57,22 +57,22 @@ public class TrxnObj extends XObj {
         return t;
     }
 
+    public String getDataName() {
+        String strData = new String(this.strData);
+        return strData;
+    }
+
     public void setDataName(String strData) {
         this.strData = new String(strData);
     }
 
-    public String getDataName() {
-        String strData = new String(this.strData);
-        return strData;
+    public int getLockType() {
+        return this.lockType;
     }
 
     public void setLockType(int lockType) {
         if ((lockType == TrxnObj.READ) || (lockType == TrxnObj.WRITE)) {
             this.lockType = lockType;
         }
-    }
-
-    public int getLockType() {
-        return this.lockType;
     }
 }

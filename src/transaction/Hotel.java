@@ -67,28 +67,28 @@ public class Hotel implements ResourceItem, Serializable {
         return location;
     }
 
-    public int getPrice() {
-        return price;
-    }
-
-    public int getNumRooms() {
-        return numRooms;
-    }
-
-    public int getNumAvail() {
-        return numAvail;
-    }
-
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public void setPrice(int price) {
         this.price = price;
     }
 
+    public int getNumRooms() {
+        return numRooms;
+    }
+
     public void setNumRooms(int numRooms) {
         this.numRooms = numRooms;
+    }
+
+    public int getNumAvail() {
+        return numAvail;
     }
 
     public void setNumAvail(int numAvail) {

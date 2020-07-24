@@ -67,28 +67,28 @@ public class Car implements ResourceItem, Serializable {
         return location;
     }
 
-    public int getPrice() {
-        return price;
-    }
-
-    public int getNumCars() {
-        return numCars;
-    }
-
-    public int getNumAvail() {
-        return numAvail;
-    }
-
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public void setPrice(int price) {
         this.price = price;
     }
 
+    public int getNumCars() {
+        return numCars;
+    }
+
     public void setNumCars(int numCars) {
         this.numCars = numCars;
+    }
+
+    public int getNumAvail() {
+        return numAvail;
     }
 
     public void setNumAvail(int numAvail) {

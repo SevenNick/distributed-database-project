@@ -19,7 +19,7 @@ public class RMFailureTest extends ReservationSystemTest {
 
     @After
     public void printMsg() {
-        System.out.println("Test Complete...\n\n");
+        System.out.println("Test Complete...\n");
     }
 
     /**
@@ -44,7 +44,7 @@ public class RMFailureTest extends ReservationSystemTest {
             try {
                 wc.abort(xid);
                 System.out.printf("Failed Component: %s\n", RMINameRooms);
-                countDown(30);
+                countDown(15);
                 wc.reconnect();
 
                 xid = wc.start();
@@ -84,7 +84,7 @@ public class RMFailureTest extends ReservationSystemTest {
             assertFalse(wc.commit(xid));
 
             System.out.printf("Failed Component: %s\n", RMINameCars);
-            countDown(30);
+            countDown(15);
             wc.reconnect();
 
             xid = wc.start();
@@ -119,7 +119,7 @@ public class RMFailureTest extends ReservationSystemTest {
             assertFalse(wc.commit(xid));
 
             System.out.printf("Failed Component: %s\n", RMINameFlights);
-            countDown(30);
+            countDown(15);
             wc.reconnect();
 
             xid = wc.start();
@@ -154,7 +154,7 @@ public class RMFailureTest extends ReservationSystemTest {
             assertTrue(wc.commit(xid));
 
             System.out.printf("Failed Component: %s\n", RMINameReservations);
-            countDown(30);
+            countDown(15);
             wc.reconnect();
 
             xid = wc.start();
@@ -184,7 +184,7 @@ public class RMFailureTest extends ReservationSystemTest {
             wc.abort(xid);
 
             System.out.printf("Failed Component: %s\n", RMINameCustomers);
-            countDown(30);
+            countDown(15);
             wc.reconnect();
 
             xid = wc.start();

@@ -52,7 +52,7 @@ public class TMFailureTest extends ReservationSystemTest {
         } catch (RemoteException remoteException) {
             try {
                 System.out.printf("Failed Component: %s\n", RMIName);
-                countDown(30);
+                countDown(15);
                 wc.reconnect();
 
                 xid = wc.start();
@@ -87,7 +87,7 @@ public class TMFailureTest extends ReservationSystemTest {
         } catch (RemoteException remoteException) {
             try {
                 System.out.printf("Failed Component: %s\n", RMIName);
-                countDown(30);
+                countDown(15);
                 wc.reconnect();
 
                 xid = wc.start();

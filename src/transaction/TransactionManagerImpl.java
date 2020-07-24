@@ -26,6 +26,137 @@ public class TransactionManagerImpl
     private int curXid;
     private Map<Integer, Transaction> txs;
 
+    public TransactionManagerImpl() throws RemoteException {
+        curXid = 1;
+        txs = new Hashtable<>();
+        dieTime = "";
+        loadLog();
+        System.out.println(this);
+        recover();
+    }
+
+    public static void main(String[] args) {
+        String rmiPort = System.getProperty("rmiPort");
+        if (rmiPort == null) {
+            rmiPort = "";
+        } else if (!rmiPort.equals("")) {
+            rmiPort = "//:" + rmiPort + "/";
+        }
+
+        try {
+            TransactionManagerImpl obj = new TransactionManagerImpl();
+            Naming.rebind(rmiPort + TransactionManager.RMIName, obj);
+            System.out.println("TM bound");
+        } catch (Exception e) {
+            System.err.println("TM not bound:" + e);
+            System.exit(1);
+        }
+    }
+
+    private Transaction getTx(int xid) throws InvalidTransactionException {
+        if (xid < 0) throw new InvalidTransactionException(xid, "Xid must be positive");
+        if (!txs.containsKey(xid)) throw new InvalidTransactionException(xid, "Xid is not exist");
+        return txs.get(xid);
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionManagerImpl{" +
+                "dieTime='" + dieTime + '\'' +
+                ", curXid=" + curXid +
+                ", txs=" + txs +
+                '}';
+    }
+
+    private void loadLog() {
+        File logFile = new File(TM_LOG_FILENAME);
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(logFile))) {
+            TransactionManagerImpl tmLog = (TransactionManagerImpl) ois.readObject();
+            this.dieTime = tmLog.dieTime;
+            this.txs = tmLog.txs;
+            this.curXid = tmLog.curXid;
+        } catch (IOException ignored) {
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void recover() {
+        for (Transaction tx : txs.values())
+            tx.recover();
+    }
+
+    private void storeLog() {
+        File logFile = new File(TM_LOG_FILENAME);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(logFile))) {
+            oos.writeObject(this);
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public synchronized int start() {
+        int xid = curXid++;
+        txs.put(xid, new Transaction(xid));
+        storeLog();
+        return xid;
+    }
+
+    @Override
+    public void enlist(int xid, ResourceManager rm) throws RemoteException, InvalidTransactionException {
+        Transaction tx = getTx(xid);
+        tx.enlist(rm);
+        storeLog();
+    }
+
+    @Override
+    public boolean commit(int xid) throws RemoteException, InvalidTransactionException {
+        Transaction tx = getTx(xid);
+        boolean prepared = tx.prepare();
+
+        if (prepared) tx.setState(TransactionState.commit);
+        else tx.setState(TransactionState.abort);
+
+        if (dieTime.equals(TM_DIE_TIME_BEFORE_COMMIT))
+            dieNow();
+
+        storeLog();
+
+        if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT)) {
+            dieNow();
+        }
+
+        tx.terminate();
+
+        return prepared;
+    }
+
+    @Override
+    public void abort(int xid) throws InvalidTransactionException {
+        Transaction tx = getTx(xid);
+        tx.setState(TransactionState.abort);
+        storeLog();
+        tx.terminate();
+    }
+
+    public boolean dieNow() {
+        System.exit(1);
+        // We won't ever get here since we exited above;
+        // but we still need it to please the compiler.
+        return true;
+    }
+
+    @Override
+    public void setDieTime(String time) {
+        this.dieTime = time;
+        System.out.println("Die time set to : " + time);
+    }
+
+    public void ping() {
+    }
+
     enum TransactionState implements Serializable {
         proceeding,
         commit,
@@ -94,7 +225,7 @@ public class TransactionManagerImpl
                     if (this.state == TransactionState.abort) rm.abort(xid);
                     else if (this.state == TransactionState.commit) rm.commit(xid);
                     iterator.remove();
-                }catch (RemoteException | InvalidTransactionException ignored) {
+                } catch (RemoteException | InvalidTransactionException ignored) {
                 }
             }
             checkTerminated();
@@ -105,138 +236,6 @@ public class TransactionManagerImpl
         synchronized void recover() {
             if (state == TransactionState.proceeding)
                 state = TransactionState.abort;
-        }
-    }
-
-    private Transaction getTx(int xid) throws InvalidTransactionException {
-        if (xid < 0) throw new InvalidTransactionException(xid, "Xid must be positive");
-        if (!txs.containsKey(xid)) throw new InvalidTransactionException(xid, "Xid is not exist");
-        return txs.get(xid);
-    }
-
-    @Override
-    public String toString() {
-        return "TransactionManagerImpl{" +
-                "dieTime='" + dieTime + '\'' +
-                ", curXid=" + curXid +
-                ", txs=" + txs +
-                '}';
-    }
-
-    public TransactionManagerImpl() throws RemoteException {
-        curXid = 1;
-        txs = new Hashtable<>();
-        dieTime = "";
-        loadLog();
-        System.out.println(this);
-        recover();
-    }
-
-    private void loadLog() {
-        File logFile = new File(TM_LOG_FILENAME);
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(logFile))) {
-            TransactionManagerImpl tmLog = (TransactionManagerImpl) ois.readObject();
-            this.dieTime = tmLog.dieTime;
-            this.txs = tmLog.txs;
-            this.curXid = tmLog.curXid;
-        } catch (IOException ignored) {
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void recover() {
-        for (Transaction tx : txs.values())
-            tx.recover();
-    }
-
-    private void storeLog() {
-        File logFile = new File(TM_LOG_FILENAME);
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(logFile))) {
-            oos.writeObject(this);
-            oos.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public synchronized int start() {
-        int xid = curXid++;
-        txs.put(xid, new Transaction(xid));
-        storeLog();
-        return xid;
-    }
-
-    @Override
-    public void enlist(int xid, ResourceManager rm) throws RemoteException, InvalidTransactionException {
-        Transaction tx = getTx(xid);
-        tx.enlist(rm);
-        storeLog();
-    }
-
-    @Override
-    public boolean commit(int xid) throws RemoteException, InvalidTransactionException {
-        Transaction tx = getTx(xid);
-        boolean prepared = tx.prepare();
-
-        if (prepared) tx.setState(TransactionState.commit);
-        else tx.setState(TransactionState.abort);
-
-        if (dieTime.equals(TM_DIE_TIME_BEFORE_COMMIT))
-            dieNow();
-
-        storeLog();
-
-        if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT)) {
-            dieNow();
-        }
-
-        tx.terminate();
-
-        return prepared;
-    }
-
-
-    @Override
-    public void abort(int xid) throws InvalidTransactionException {
-        Transaction tx = getTx(xid);
-        tx.setState(TransactionState.abort);
-        storeLog();
-        tx.terminate();
-    }
-
-    public boolean dieNow() {
-        System.exit(1);
-        // We won't ever get here since we exited above;
-        // but we still need it to please the compiler.
-        return true;
-    }
-
-    @Override
-    public void setDieTime(String time) {
-        this.dieTime = time;
-        System.out.println("Die time set to : " + time);
-    }
-
-    public void ping() {
-    }
-
-    public static void main(String[] args) {
-        String rmiPort = System.getProperty("rmiPort");
-        if (rmiPort == null) {
-            rmiPort = "";
-        } else if (!rmiPort.equals("")) {
-            rmiPort = "//:" + rmiPort + "/";
-        }
-
-        try {
-            TransactionManagerImpl obj = new TransactionManagerImpl();
-            Naming.rebind(rmiPort + TransactionManager.RMIName, obj);
-            System.out.println("TM bound");
-        } catch (Exception e) {
-            System.err.println("TM not bound:" + e);
-            System.exit(1);
         }
     }
 }

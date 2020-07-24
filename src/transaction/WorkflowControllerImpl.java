@@ -20,37 +20,17 @@ public class WorkflowControllerImpl
         extends java.rmi.server.UnicastRemoteObject
         implements WorkflowController {
 
+    private static final String TABLE_NAME_FLIGHT = "FLIGHTS";
+    private static final String TABLE_NAME_HOTEL = "HOTELS";
+    private static final String TABLE_NAME_CAR = "CARS";
+    private static final String TABLE_NAME_CUSTOMER = "CUSTOMERS";
+    private static final String TABLE_NAME_RESERVATION = "RESERVATIONS";
     private ResourceManager rmFlights = null;
     private ResourceManager rmHotels = null;
     private ResourceManager rmCars = null;
     private ResourceManager rmCustomers = null;
     private ResourceManager rmReservations = null;
     private TransactionManager tm = null;
-
-    private static final String TABLE_NAME_FLIGHT = "FLIGHTS";
-    private static final String TABLE_NAME_HOTEL = "HOTELS";
-    private static final String TABLE_NAME_CAR = "CARS";
-    private static final String TABLE_NAME_CUSTOMER = "CUSTOMERS";
-    private static final String TABLE_NAME_RESERVATION = "RESERVATIONS";
-
-    public static void main(String[] args) {
-        String rmiPort = System.getProperty("rmiPort");
-        if (rmiPort == null) {
-            rmiPort = "";
-        } else if (!rmiPort.equals("")) {
-            rmiPort = "//:" + rmiPort + "/";
-        }
-
-        try {
-            WorkflowControllerImpl obj = new WorkflowControllerImpl();
-            Naming.rebind(rmiPort + WorkflowController.RMIName, obj);
-            System.out.println("WC bound");
-        } catch (Exception e) {
-            System.err.println("WC not bound:" + e);
-            System.exit(1);
-        }
-    }
-
 
     public WorkflowControllerImpl() throws RemoteException {
         String rmiPort = System.getProperty("rmiPort");
@@ -82,6 +62,23 @@ public class WorkflowControllerImpl
         }
     }
 
+    public static void main(String[] args) {
+        String rmiPort = System.getProperty("rmiPort");
+        if (rmiPort == null) {
+            rmiPort = "";
+        } else if (!rmiPort.equals("")) {
+            rmiPort = "//:" + rmiPort + "/";
+        }
+
+        try {
+            WorkflowControllerImpl obj = new WorkflowControllerImpl();
+            Naming.rebind(rmiPort + WorkflowController.RMIName, obj);
+            System.out.println("WC bound");
+        } catch (Exception e) {
+            System.err.println("WC not bound:" + e);
+            System.exit(1);
+        }
+    }
 
     // TRANSACTION INTERFACE
     // Logic is done by invoke interfaces of TransactionManager
@@ -755,27 +752,45 @@ public class WorkflowControllerImpl
             throws RemoteException {
         if (who.equals(TransactionManager.RMIName) ||
                 who.equals("ALL")) {
-            tm.dieNow();
+            try {
+                tm.dieNow();
+            } catch (RemoteException e) {
+            }
         }
         if (who.equals(ResourceManager.RMINameFlights) ||
                 who.equals("ALL")) {
-            rmFlights.dieNow();
+            try {
+                rmFlights.dieNow();
+            } catch (RemoteException e) {
+            }
         }
         if (who.equals(ResourceManager.RMINameRooms) ||
                 who.equals("ALL")) {
-            rmHotels.dieNow();
+            try {
+                rmHotels.dieNow();
+            } catch (RemoteException e) {
+            }
         }
         if (who.equals(ResourceManager.RMINameCars) ||
                 who.equals("ALL")) {
-            rmCars.dieNow();
+            try {
+                rmCars.dieNow();
+            } catch (RemoteException e) {
+            }
         }
         if (who.equals(ResourceManager.RMINameCustomers) ||
                 who.equals("ALL")) {
-            rmCustomers.dieNow();
+            try {
+                rmCustomers.dieNow();
+            } catch (RemoteException e) {
+            }
         }
         if (who.equals(ResourceManager.RMINameReservations) ||
                 who.equals("ALL")) {
-            rmReservations.dieNow();
+            try {
+                rmReservations.dieNow();
+            } catch (RemoteException e) {
+            }
         }
         if (who.equals(WorkflowController.RMIName) ||
                 who.equals("ALL")) {
