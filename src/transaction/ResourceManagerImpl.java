@@ -1,24 +1,12 @@
 package transaction;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.rmi.Naming;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import lockmgr.DeadlockException;
 import lockmgr.LockManager;
+
+import java.io.*;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.util.*;
 
 /**
  * Resource Manager for the Distributed Travel Reservation System.
@@ -28,41 +16,19 @@ import lockmgr.LockManager;
 
 public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject implements ResourceManager {
     protected final static String TRANSACTION_LOG_FILENAME = "transactions.log";
-
-    public Set getTransactions() {
-        return xids;
-    }
-
-    public Collection getUpdatedRows(int xid, String tablename) {
-        RMTable table = getTable(xid, tablename);
-        return new ArrayList(table.table.values());
-    }
-
-    public Collection getUpdatedRows(String tablename) {
-        RMTable table = getTable(tablename);
-        return new ArrayList(table.table.values());
-    }
-
     protected String myRMIName = null; // Used to distinguish this RM from other
-
     protected String dieTime;
-
-    public void setDieTime(String time) throws RemoteException {
-        dieTime = time;
-        System.out.println("Die time set to : " + time);
-    }
-
-    public String getID() throws RemoteException {
-        return myRMIName;
-    }
-
     // RMs
     protected HashSet xids = new HashSet();
+    protected TransactionManager tm = null;
+    protected LockManager lm = new LockManager();
+    protected Hashtable tables = new Hashtable();
+    private String transactionFile;
 
     public ResourceManagerImpl(String rmiName) throws RemoteException {
         myRMIName = rmiName;
         dieTime = "NoDie";
-
+        transactionFile = String.format("data/%s%s", rmiName, TRANSACTION_LOG_FILENAME);
         recover();
 
         while (!reconnect()) {
@@ -94,6 +60,59 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
         }).start();
     }
 
+    //  test usage
+    public ResourceManagerImpl() throws RemoteException {
+    }
+
+    public static void main(String[] args) {
+        String rmiName = System.getProperty("rmiName");
+        if (rmiName == null || rmiName.equals("")) {
+            System.err.println("No RMI name given");
+            System.exit(1);
+        }
+
+        String rmiPort = System.getProperty("rmiPort");
+        if (rmiPort == null) {
+            rmiPort = "";
+        } else if (!rmiPort.equals("")) {
+            rmiPort = "//:" + rmiPort + "/";
+        }
+
+        ResourceManagerImpl obj = null;
+        try {
+            obj = new ResourceManagerImpl(rmiName);
+            Naming.rebind(rmiPort + rmiName, obj);
+            System.out.println(rmiName + " bound");
+        } catch (Exception e) {
+            System.err.println(rmiName + " not bound:" + e);
+            System.exit(1);
+        }
+
+    }
+
+    public Set getTransactions() {
+        return xids;
+    }
+
+    public Collection getUpdatedRows(int xid, String tablename) {
+        RMTable table = getTable(xid, tablename);
+        return new ArrayList(table.table.values());
+    }
+
+    public Collection getUpdatedRows(String tablename) {
+        RMTable table = getTable(tablename);
+        return new ArrayList(table.table.values());
+    }
+
+    public void setDieTime(String time) throws RemoteException {
+        dieTime = time;
+        System.out.println("Die time set to : " + time);
+    }
+
+    public String getID() throws RemoteException {
+        return myRMIName;
+    }
+
     public void ping() {
     }
 
@@ -112,7 +131,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             if (datas[i].isDirectory()) {
                 continue;
             }
-            if (datas[i].getName().equals(TRANSACTION_LOG_FILENAME)) {
+            if (datas[i].getName().contains(TRANSACTION_LOG_FILENAME)) {
                 continue;
             }
             getTable(datas[i].getName());
@@ -178,8 +197,6 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
         // but we still need it to please the compiler.
     }
 
-    protected TransactionManager tm = null;
-
     public TransactionManager getTransactionManager() throws TransactionManagerUnaccessibleException {
         if (tm != null) {
             try {
@@ -198,13 +215,13 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             return tm;
     }
 
-    protected LockManager lm = new LockManager();
+    public void setTransactionManager(TransactionManager tm) {
+        this.tm = tm;
+    }
 
     protected LockManager getLockManager() {
         return lm;
     }
-
-    protected Hashtable tables = new Hashtable();
 
     protected RMTable loadTable(File file) {
         ObjectInputStream oin = null;
@@ -277,7 +294,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
     }
 
     protected HashSet loadTransactionLogs() {
-        File xidLog = new File("data/transactions.log");
+        File xidLog = new File(transactionFile);
         ObjectInputStream oin = null;
         try {
             oin = new ObjectInputStream(new FileInputStream(xidLog));
@@ -294,7 +311,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
     }
 
     protected boolean storeTransactionLogs(HashSet xids) {
-        File xidLog = new File("data/transactions.log");
+        File xidLog = new File(transactionFile);
         xidLog.getParentFile().mkdirs();
         xidLog.getParentFile().mkdirs();
         ObjectOutputStream oout = null;
@@ -609,6 +626,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
 
         synchronized (xids) {
             xids.remove(new Integer(xid));
+            storeTransactionLogs(xids);
         }
     }
 
@@ -635,40 +653,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
 
         synchronized (xids) {
             xids.remove(new Integer(xid));
+            storeTransactionLogs(xids);
         }
-    }
-
-    //  test usage
-    public ResourceManagerImpl() throws RemoteException {
-    }
-
-    public void setTransactionManager(TransactionManager tm) {
-        this.tm = tm;
-    }
-
-    public static void main(String[] args) {
-        String rmiName = System.getProperty("rmiName");
-        if (rmiName == null || rmiName.equals("")) {
-            System.err.println("No RMI name given");
-            System.exit(1);
-        }
-
-        String rmiPort = System.getProperty("rmiPort");
-        if (rmiPort == null) {
-            rmiPort = "";
-        } else if (!rmiPort.equals("")) {
-            rmiPort = "//:" + rmiPort + "/";
-        }
-
-        ResourceManagerImpl obj = null;
-        try {
-            obj = new ResourceManagerImpl(rmiName);
-            Naming.rebind(rmiPort + rmiName, obj);
-            System.out.println(rmiName + " bound");
-        } catch (Exception e) {
-            System.err.println(rmiName + " not bound:" + e);
-            System.exit(1);
-        }
-
     }
 }
