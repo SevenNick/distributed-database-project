@@ -5,6 +5,7 @@ import org.junit.Test;
 import transaction.WorkflowController;
 
 import java.rmi.RemoteException;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static transaction.ResourceManager.*;
@@ -141,7 +142,8 @@ public class RMFailureTest extends ReservationSystemTest {
         System.out.printf("\nTesting RM Failure...(DieTime: %s)\n", RM_DIE_TIME_BEFORE_COMMIT);
 
         int xid;
-        String RMKey = "failure-before-commit-test";
+        // This transaction will be committed, thus the RMKey should be different in every test
+        String RMKey = "failure-before-commit-test" + UUID.randomUUID();
         int num = 100;
         int price = 999;
         try {
