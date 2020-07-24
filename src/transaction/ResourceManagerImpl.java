@@ -126,7 +126,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
             int xid = Integer.parseInt(datas[i].getName());
             if (!xids.contains(xid)) {
                 //this should never happen;
-                throw new RuntimeException("ERROR: UNEXPECTED XID");
+                throw new RuntimeException("ERROR: UNEXPECTED XID " + xid);
             }
             for (File xdata : xdatas) {
                 RMTable xtable = getTable(xid, xdata.getName());

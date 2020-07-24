@@ -3,10 +3,10 @@ package transaction;
 import java.io.*;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import static transaction.WorkflowController.TM_DIE_TIME_AFTER_COMMIT;
 import static transaction.WorkflowController.TM_DIE_TIME_BEFORE_COMMIT;
@@ -34,12 +34,12 @@ public class TransactionManagerImpl
 
     private class Transaction implements Serializable {
         int xid;
-        Set<ResourceManager> rms;
+        Map<String, ResourceManager> rms;
         TransactionState state;
 
         Transaction(int xid) {
             this.xid = xid;
-            this.rms = new HashSet<>();
+            this.rms = new HashMap<>();
             this.state = TransactionState.proceeding;
         }
 
@@ -50,14 +50,14 @@ public class TransactionManagerImpl
 
         synchronized void enlist(ResourceManager rm) throws InvalidTransactionException, RemoteException {
             if (this.state == TransactionState.proceeding) {
-                rms.add(rm);
-            } else if (this.state == TransactionState.commit && rms.contains(rm)) {
+                rms.put(rm.getID(), rm);
+            } else if (this.state == TransactionState.commit && rms.containsKey(rm.getID())) {
                 rm.commit(this.xid);
-                rms.remove(rm);
+                rms.remove(rm.getID());
                 checkTerminated();
-            } else if (this.state == TransactionState.abort && rms.contains(rm)) {
+            } else if (this.state == TransactionState.abort && rms.containsKey(rm.getID())) {
                 rm.abort(this.xid);
-                rms.remove(rm);
+                rms.remove(rm.getID());
                 checkTerminated();
             }
         }
@@ -72,7 +72,7 @@ public class TransactionManagerImpl
         synchronized boolean prepare() {
             boolean ret = true;
             try {
-                for (ResourceManager rm : rms)
+                for (ResourceManager rm : rms.values())
                     ret &= rm.prepare(xid);
             } catch (RemoteException | InvalidTransactionException e) {
                 ret = false;
@@ -85,20 +85,26 @@ public class TransactionManagerImpl
         }
 
         synchronized void terminate() {
-            if (state == TransactionState.proceeding)
-                state = TransactionState.abort;
             System.out.format("%s starts terminating.\n", this.toString());
-            Set<ResourceManager> toRemove = new HashSet<>();
-            for (ResourceManager rm : rms) {
+            Iterator<Map.Entry<String, ResourceManager>> iterator = rms.entrySet().iterator();
+            ResourceManager rm;
+            while (iterator.hasNext()) {
                 try {
+                    rm = iterator.next().getValue();
                     if (this.state == TransactionState.abort) rm.abort(xid);
                     else if (this.state == TransactionState.commit) rm.commit(xid);
-                    toRemove.add(rm);
-                } catch (RemoteException | InvalidTransactionException ignored) {
+                    iterator.remove();
+                }catch (RemoteException | InvalidTransactionException ignored) {
                 }
             }
-            rms.removeAll(toRemove);
             checkTerminated();
+        }
+
+        // TX recover only needs to do one thing:
+        // set any proceeding transactions to abort
+        synchronized void recover() {
+            if (state == TransactionState.proceeding)
+                state = TransactionState.abort;
         }
     }
 
@@ -141,7 +147,7 @@ public class TransactionManagerImpl
 
     private void recover() {
         for (Transaction tx : txs.values())
-            tx.terminate();
+            tx.recover();
     }
 
     private void storeLog() {
@@ -171,19 +177,22 @@ public class TransactionManagerImpl
 
     @Override
     public boolean commit(int xid) throws RemoteException, InvalidTransactionException {
-        if (dieTime.equals(TM_DIE_TIME_BEFORE_COMMIT))
-            dieNow();
-
         Transaction tx = getTx(xid);
         boolean prepared = tx.prepare();
 
         if (prepared) tx.setState(TransactionState.commit);
         else tx.setState(TransactionState.abort);
-        storeLog();
-        tx.terminate();
 
-        if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT))
+        if (dieTime.equals(TM_DIE_TIME_BEFORE_COMMIT))
             dieNow();
+
+        storeLog();
+
+        if (dieTime.equals(TM_DIE_TIME_AFTER_COMMIT)) {
+            dieNow();
+        }
+
+        tx.terminate();
 
         return prepared;
     }
