@@ -119,7 +119,7 @@ public class WorkflowControllerImpl
             Flight flight = (Flight) rmFlights.query(xid, TABLE_NAME_FLIGHT, flightNum);
 
             if (flight == null) { // the flight does not exist, add a new flight
-                price = price > 0 ? price : 0;
+                price = Math.max(price, 0);
                 flight = new Flight(flightNum, price, numSeats, numSeats);
                 return rmFlights.insert(xid, TABLE_NAME_FLIGHT, flight);
             } else { // the flight already exists, update the flight
