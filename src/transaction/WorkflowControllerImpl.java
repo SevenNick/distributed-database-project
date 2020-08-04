@@ -238,7 +238,7 @@ public class WorkflowControllerImpl
             Car car = (Car) rmCars.query(xid, TABLE_NAME_CAR, location);
 
             if (car == null) { // the car does not exist, add a new car
-                price = price > 0 ? price : 0;
+                price = Math.max(price, 0);
                 car = new Car(location, price, numCars, numCars);
                 return rmCars.insert(xid, TABLE_NAME_CAR, car);
             } else { // the car already exists, update the car
@@ -748,52 +748,41 @@ public class WorkflowControllerImpl
         return false;
     }
 
-    public boolean dieNow(String who)
-            throws RemoteException {
-        if (who.equals(TransactionManager.RMIName) ||
-                who.equals("ALL")) {
+    public boolean dieNow(String who) throws RemoteException {
+        if (who.equals(TransactionManager.RMIName) || who.equals("ALL")) {
             try {
                 tm.dieNow();
-            } catch (RemoteException e) {
+            } catch (RemoteException ignored) {
             }
         }
-        if (who.equals(ResourceManager.RMINameFlights) ||
-                who.equals("ALL")) {
+        if (who.equals(ResourceManager.RMINameFlights) || who.equals("ALL")) {
             try {
                 rmFlights.dieNow();
-            } catch (RemoteException e) {
+            } catch (RemoteException ignored) {
             }
         }
-        if (who.equals(ResourceManager.RMINameRooms) ||
-                who.equals("ALL")) {
+        if (who.equals(ResourceManager.RMINameRooms) || who.equals("ALL")) {
             try {
                 rmHotels.dieNow();
-            } catch (RemoteException e) {
+            } catch (RemoteException ignored) {
             }
         }
-        if (who.equals(ResourceManager.RMINameCars) ||
-                who.equals("ALL")) {
+        if (who.equals(ResourceManager.RMINameCars) || who.equals("ALL")) {
             try {
                 rmCars.dieNow();
-            } catch (RemoteException e) {
+            } catch (RemoteException ignored) {
             }
         }
-        if (who.equals(ResourceManager.RMINameCustomers) ||
-                who.equals("ALL")) {
+        if (who.equals(ResourceManager.RMINameCustomers) || who.equals("ALL")) {
             try {
                 rmCustomers.dieNow();
-            } catch (RemoteException e) {
+            } catch (RemoteException ignored) {
             }
         }
-        if (who.equals(ResourceManager.RMINameReservations) ||
-                who.equals("ALL")) {
-            try {
-                rmReservations.dieNow();
-            } catch (RemoteException e) {
-            }
+        if (who.equals(ResourceManager.RMINameReservations) || who.equals("ALL")) {
+            rmReservations.dieNow();
         }
-        if (who.equals(WorkflowController.RMIName) ||
-                who.equals("ALL")) {
+        if (who.equals(WorkflowController.RMIName) || who.equals("ALL")) {
             System.exit(1);
         }
         return true;

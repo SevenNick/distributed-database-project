@@ -22,17 +22,20 @@ public class TransactionManagerImpl
         implements TransactionManager, Serializable {
     private static final String TM_LOG_FILENAME = "data/TM.log";
 
-    private String dieTime;
+    private transient String dieTime;
     private int curXid;
     private Map<Integer, Transaction> txs;
 
     public TransactionManagerImpl() throws RemoteException {
         curXid = 1;
         txs = new Hashtable<>();
-        dieTime = "";
+
         loadLog();
-        System.out.println(this);
         recover();
+
+        dieTime = "NoDie";
+
+        System.out.println(this);
     }
 
     public static void main(String[] args) {
@@ -86,7 +89,7 @@ public class TransactionManagerImpl
             tx.recover();
     }
 
-    private void storeLog() {
+    private synchronized void storeLog() {
         File logFile = new File(TM_LOG_FILENAME);
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(logFile))) {
             oos.writeObject(this);
@@ -101,6 +104,7 @@ public class TransactionManagerImpl
         int xid = curXid++;
         txs.put(xid, new Transaction(xid));
         storeLog();
+        System.out.println("Start TX " + xid);
         return xid;
     }
 
@@ -201,14 +205,14 @@ public class TransactionManagerImpl
         }
 
         synchronized boolean prepare() {
-            boolean ret = true;
             try {
                 for (ResourceManager rm : rms.values())
-                    ret &= rm.prepare(xid);
+                    if (!rm.prepare(xid))
+                        return false;
             } catch (RemoteException | InvalidTransactionException e) {
-                ret = false;
+                return false;
             }
-            return ret;
+            return true;
         }
 
         synchronized void setState(TransactionState state) {

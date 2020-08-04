@@ -24,7 +24,11 @@ public class ReservationSystemTest {
         }
     }
 
+    public static final int COUNT_DOWN_SECONDS = 10;
+
     void countDown(int seconds) {
+        if (seconds < 0)
+            seconds = COUNT_DOWN_SECONDS;
         try {
             while (seconds >= 0) {
                 System.out.print("\r");

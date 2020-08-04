@@ -17,7 +17,7 @@ public class SystemFailureTest extends ReservationSystemTest {
     @Test
     public void testSystemFailure() {
         int xid;
-        //because rmKey1 will be committed, it should be different in every test
+        // because rmKey1 will be committed, it should be different in every test
         String rmKey1 = "committed-transaction" + UUID.randomUUID();
         String rmKey2 = "aborted-transaction";
         String rmKey3 = "un-finished-transaction";
@@ -25,7 +25,7 @@ public class SystemFailureTest extends ReservationSystemTest {
         int price = 999;
 
         try {
-            //commit a transaction
+            // commit a transaction
             xid = wc.start();
             wc.newCustomer(xid, rmKey1);
             wc.addFlight(xid, rmKey1, num, price);
@@ -36,7 +36,7 @@ public class SystemFailureTest extends ReservationSystemTest {
             wc.reserveCar(xid, rmKey1, rmKey1);
             wc.commit(xid);
 
-            //abort a transaction
+            // abort a transaction
             xid = wc.start();
             wc.newCustomer(xid, rmKey2);
             wc.addFlight(xid, rmKey2, num, price);
