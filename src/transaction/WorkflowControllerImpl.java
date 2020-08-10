@@ -780,7 +780,10 @@ public class WorkflowControllerImpl
             }
         }
         if (who.equals(ResourceManager.RMINameReservations) || who.equals("ALL")) {
-            rmReservations.dieNow();
+            try {
+                rmReservations.dieNow();
+            } catch (RemoteException ignored) {
+            }
         }
         if (who.equals(WorkflowController.RMIName) || who.equals("ALL")) {
             System.exit(1);

@@ -24,7 +24,7 @@ public class ReservationSystemTest {
         }
     }
 
-    public static final int COUNT_DOWN_SECONDS = 10;
+    public static final int COUNT_DOWN_SECONDS = 15;
 
     void countDown(int seconds) {
         if (seconds < 0)

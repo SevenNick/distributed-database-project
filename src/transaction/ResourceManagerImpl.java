@@ -28,7 +28,7 @@ public class ResourceManagerImpl extends java.rmi.server.UnicastRemoteObject imp
     public ResourceManagerImpl(String rmiName) throws RemoteException {
         myRMIName = rmiName;
         dieTime = "NoDie";
-        transactionFile = String.format("data/%s%s", rmiName, TRANSACTION_LOG_FILENAME);
+        transactionFile = String.format("data/%s_%s", rmiName, TRANSACTION_LOG_FILENAME);
         recover();
 
         while (!reconnect()) {

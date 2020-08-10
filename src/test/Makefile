@@ -24,6 +24,8 @@ run_tm_failure_test: failure_test
 run_system_failure_test: failure_test
 	$(PATH)/java -classpath $(PROJECT_ROOT):$(JUNIT_PATH):$(HAMCREST_PATH) -DrmiPort=$(RMI_PORT) org.junit.runner.JUnitCore test.SystemFailureTest
 
+run_test: run_normal_test run_rm_failure_test run_tm_failure_test run_system_failure_test
+
 %.class : %.java ReservationSystemTest.java
 	$(PATH)/javac -classpath $(PROJECT_ROOT):$(JUNIT_PATH) $< ReservationSystemTest.java
 
