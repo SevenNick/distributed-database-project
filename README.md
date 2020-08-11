@@ -1,8 +1,7 @@
 # 分布式旅游预订系统
 
-组长：谢思豪
-
-组员：麻俊特，朱文炳
+## 项目地址
+Github: https://github.com/SevenNick/distributed-database-project
 
 ## 运行项目
 
@@ -23,13 +22,13 @@
 3. 启动多个Resource Manager（RM）。
 
     ```shell
-    make runrmcars
-    ```
-    ```shell
     make runrmflights
     ```
     ```shell
     make runrmrooms
+    ```
+    ```shell
+    make runrmcars
     ```
     ```shell
     make runrmcustomers
@@ -91,5 +90,4 @@
         make run_test
         ```
         
-> 注：在进行故障测试的过程中，系统组件会模拟故障发生并退出。为了测试能正常运行，测试人员需根据测试程序的提示
-在规定的时间内重启退出的系统组件。
+> 注：在进行故障测试的过程中，系统组件会模拟故障发生并退出。为了测试能正常运行，测试人员需根据测试程序的提示在规定的时间内重启因故障而退出的系统组件。
